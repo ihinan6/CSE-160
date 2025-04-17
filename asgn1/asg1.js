@@ -64,13 +64,6 @@ function addActionForHtmlUI(){
 	document.getElementById('circleButton').onclick = function(){
 		g_selectedType = CIRCLE;
 	};
-/**
-	document.getElementById('bgButton').onclick = function(){
-		gl.clearColor(g_selectedColor[0], g_selectedColor[1], g_selectedColor[2], g_selectedColor[3]);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-		renderAllShapes();
-	};
-**/
 	
 	document.getElementById('redSlide').addEventListener('mouseup', function(){
 		g_selectedColor[0] = this.value/100; 
@@ -83,12 +76,6 @@ function addActionForHtmlUI(){
 	        function(){
 			g_selectedColor[2] = this.value/100; 
 	});
-	/**
-	document.getElementById('alpSlide').addEventListener('mouseup', 
-	        function(){
-			g_selectedColor[3] = this.value/100; 
-	});
-	**/
 
 	document.getElementById('sizeSlide').addEventListener('mouseup', 
 	        function(){
@@ -98,6 +85,10 @@ function addActionForHtmlUI(){
 	        function(){
 			g_selectedSides = this.value; 
 	});
+
+	document.getElementById('draw').onclick = function(){
+		drawPicture();
+	};
 }
 
 /**

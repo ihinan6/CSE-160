@@ -4,6 +4,8 @@ class Triangle{
 		this.position = [0,0,0];
 		this.color = [1,1,1,1];
 		this.size = [5];
+		this.reflectX = false;
+		this.reflectY = false;
 	}
 
 	render(){
@@ -14,7 +16,27 @@ class Triangle{
 		gl.uniform4f(u_FragColor,rgba[0],rgba[1],rgba[2],rgba[3]);
 		gl.uniform1f(u_Size, size);
 		var d = this.size/200;
-		drawTriangle([xy[0],xy[1],xy[0]+d,xy[1],xy[0],xy[1]+d]);
+		//drawTriangle([xy[0],xy[1],xy[0]+d,xy[1]+d,xy[0],xy[1]+d]);
+		
+
+		let vertices = [
+			xy[0],xy[1],xy[0]+d, xy[1] + d,xy[0], xy[1] + d];
+
+
+		if (this.reflectX){
+			const cx = xy[0];
+			for(let i=0;i<vertices.length;i+=2){
+				vertices[i] = cx - (vertices[i] - cx);
+			}
+		}
+		if (this.reflectY){
+			const cy = xy[1];
+			for(let i=1;i<vertices.length;i+=2){
+				vertices[i] = cy - (vertices[i] - cy);
+			}
+		}
+
+		drawTriangle(vertices);
 	}
 
 }
