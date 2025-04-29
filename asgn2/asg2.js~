@@ -11,13 +11,16 @@ let u_GlobalRotateMatrix;
 let g_selectedColor = [1,1,1,1]
 let g_selectedSides = 3;
 var g_shapesList = [];
-let g_globalAngleY = 0;
+let g_globalAngleY = 10;
 
-let g_globalAngle = 0;
+let g_globalAngle = 35;
 let g_rwingAngle = 0;
 let g_beakAngle = 0;
+let g_legsAngle = 0;
 let g_beakAnimation = false;
 let g_wingsAnimation = false;
+let g_legsAnimation = false;
+let g_flyAnimation = false;
 
 var VSHADER_SOURCE =
 	    'attribute vec4 a_Position;\n' +
@@ -62,6 +65,14 @@ function addActionForHtmlUI(){
 	document.getElementById('animationWingsOffButton').onclick = function() {g_wingsAnimation = false;};
 	document.getElementById('animationWingsOnButton').onclick = function() {g_wingsAnimation = true;};
 
+	document.getElementById('animationLegsOffButton').onclick = function() {g_legsAnimation = false;};
+	document.getElementById('animationLegsOnButton').onclick = function() {g_legsAnimation = true;};
+
+	document.getElementById('animationFlyOffButton').onclick = function() {g_flyAnimation = false;};
+	document.getElementById('animationFlyOnButton').onclick = function() {g_flyAnimation = true;};
+
+
+
 	// angle slider event
 	document.getElementById('angleSlide').addEventListener('mousemove',function(){
 		g_globalAngle = this.value;
@@ -95,6 +106,24 @@ function addActionForHtmlUI(){
 		g_rwingAngle = this.value;
 		renderScene();
 	});
+
+	document.getElementById('legsSlide').addEventListener('mousemove', function(){
+		g_legsAngle = this.value;
+		renderScene();
+	});
+
+
+	document.getElementById('animationFlyOnButton').onclick = function() {
+		    g_beakAnimation = true;
+		    g_wingsAnimation = true;
+		    g_legsAnimation = true;
+	};
+
+	document.getElementById('animationFlyOffButton').onclick = function() {
+		    g_beakAnimation = false;
+		    g_wingsAnimation = false;
+		    g_legsAnimation = false;
+	};
 
 
 }
@@ -184,7 +213,10 @@ function updateAnimationAngles(){
 		g_beakAngle = Math.abs((45*Math.sin(5*g_seconds)));
 	}
 	if(g_wingsAnimation){
-		g_rwingAngle = Math.abs((65*Math.sin(5*g_seconds)));
+		g_rwingAngle = Math.abs((70*Math.sin(7*g_seconds)));
+	}
+	if(g_legsAnimation){
+		g_legsAngle = (45*Math.sin(7*g_seconds));
 	}
 }
 
@@ -290,6 +322,62 @@ function renderScene(){
 	lwing.matrix.scale(0.05,0.45,0.25);
 	lwing.render();
 
+	// right leg
+	var rleg = new Cube();
+	rleg.color = [1,0.7,0,1];
+	rleg.matrix.setTranslate(0.15,-0.14,0.1);
+	rleg.matrix.rotate(160,1,0,0);
+	rleg.matrix.rotate(g_legsAngle,1,0,0);
+	var rjoint = new Matrix4(rleg.matrix);
+	rleg.matrix.scale(0.05,0.2,.05);
+	rleg.render();
+
+	var rleg2 = new Cube();
+	rleg2.color = [1,0.6,0,1];
+	rleg2.matrix = rjoint;
+	rleg2.matrix.translate(0,0.28,0.124);
+	rleg2.matrix.rotate(220,1,0,0);
+	var rjoint2 = new Matrix4(rleg2.matrix);
+	rleg2.matrix.scale(0.05,0.15,.05);
+	rleg2.render();
+
+	var rfoot = new Cube();
+	rfoot.color = [1,0.6,0,1];
+	rfoot.matrix = rjoint2;
+	rfoot.matrix.translate(-0.028,0,-0.1);
+	rfoot.matrix.rotate(0,1,0,0);
+	rfoot.matrix.scale(0.1,0.05,0.1);
+	rfoot.render();
+
+
+
+	// left leg
+	var lleg = new Cube();
+	lleg.color = [1,0.7,0,1];
+	lleg.matrix.setTranslate(-0.15,-0.14,0.1);
+	lleg.matrix.rotate(160,1,0,0);
+	lleg.matrix.rotate(-g_legsAngle,1,0,0);
+	var ljoint = new Matrix4(lleg.matrix);
+	lleg.matrix.scale(0.05,0.2,.05);
+	lleg.render();
+
+	var lleg2 = new Cube();
+	lleg2.color = [1,0.6,0,1];
+	lleg2.matrix = ljoint;
+	lleg2.matrix.translate(0,0.28,0.124);
+	lleg2.matrix.rotate(220,1,0,0);
+	var ljoint2 = new Matrix4(lleg2.matrix);
+	lleg2.matrix.scale(0.05,0.15,.05);
+	lleg2.render();
+
+	var lfoot = new Cube();
+	lfoot.color = [1,0.6,0,1];
+	lfoot.matrix = ljoint2;
+	lfoot.matrix.translate(-0.028,0,-0.1);
+	lfoot.matrix.rotate(0,1,0,0);
+	lfoot.matrix.scale(0.1,0.05,0.1);
+	lfoot.render();
+
 
 
 /**
@@ -346,7 +434,6 @@ function click(ev){
 
 	point.position = [x,y];
 	point.color = g_selectedColor.slice();
-//	point.size = g_selectedSize;
 	g_shapesList.push(point);
 
 	renderScene();
