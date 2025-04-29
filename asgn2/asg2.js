@@ -125,6 +125,13 @@ function addActionForHtmlUI(){
 		    g_legsAnimation = false;
 	};
 
+	document.getElementById('resetCameraButton').onclick = function() {
+		g_globalAngle = 35;
+	        g_globalAngleY = -10;
+	        document.getElementById('angleSlide').value = 0;
+		document.getElementById('angleYSlide').value = 0;
+	        renderScene();
+	};
 
 }
 

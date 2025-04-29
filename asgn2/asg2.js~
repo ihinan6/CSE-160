@@ -11,7 +11,7 @@ let u_GlobalRotateMatrix;
 let g_selectedColor = [1,1,1,1]
 let g_selectedSides = 3;
 var g_shapesList = [];
-let g_globalAngleY = 10;
+let g_globalAngleY = -10;
 
 let g_globalAngle = 35;
 let g_rwingAngle = 0;
@@ -125,6 +125,13 @@ function addActionForHtmlUI(){
 		    g_legsAnimation = false;
 	};
 
+	document.getElementById('resetCameraButton').onclick = function() {
+		g_globalAngle = 35;
+	        g_globalAngleY = -10;
+	        document.getElementById('angleSlide').value = 0;
+		document.getElementById('angleYSlide').value = 0;
+	        renderScene();
+	};
 
 }
 
