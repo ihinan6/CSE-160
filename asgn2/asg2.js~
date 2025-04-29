@@ -6,41 +6,26 @@ let canvas;
 let gl;
 let a_Position;
 let u_FragColor;
-//let u_Size;
 let u_ModelMatrix;
 let u_GlobalRotateMatrix;
 let g_selectedColor = [1,1,1,1]
-//let g_selectedSize = 5;
-//let g_selectedType = POINT;
 let g_selectedSides = 3;
-//var g_selectedBook;
 var g_shapesList = [];
+let g_globalAngleY = 0;
 
 let g_globalAngle = 0;
-//let g_yellowAngle = 0;
-//let g_magentaAngle = 0;
 let g_rwingAngle = 0;
 let g_beakAngle = 0;
-//let g_yellowAnimation = false;
-//let g_magentaAnimation = false;
 let g_beakAnimation = false;
 let g_wingsAnimation = false;
 
 var VSHADER_SOURCE =
 	    'attribute vec4 a_Position;\n' +
-	    //'uniform float u_Size;\n' +
 	    'uniform mat4 u_ModelMatrix;\n' +
 	    'uniform mat4 u_GlobalRotateMatrix;\n' +
 	    'void main() {\n' +
-	    //'  gl_Position = a_Position;\n' +
-	   // '  gl_PointSize = u_Size;\n' +
             '  gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;' +	
 	    '}\n';
-	    /**	
-	    'void main() {\n' +
-	    '	gl_Position = u_ModelMatrix * a_Position;' +	
-	    '}\n';
-		**/
 
 var FSHADER_SOURCE =
 	    'precision mediump float;\n' +
@@ -70,51 +55,6 @@ function addActionForHtmlUI(){
 		g_shapesList = [];
 		renderScene();
 	};
-/**
-	document.getElementById('pointButton').onclick = function(){
-		g_selectedType = POINT;
-	};
-
-	document.getElementById('triangleButton').onclick = function(){
-		g_selectedType = TRIANGLE;
-	};
-	
-	document.getElementById('circleButton').onclick = function(){
-		g_selectedType = CIRCLE;
-	};
-	
-	document.getElementById('redSlide').addEventListener('mouseup', function(){
-		g_selectedColor[0] = this.value/100; 
-	});
-	document.getElementById('greenSlide').addEventListener('mouseup', 
-	        function(){
-			g_selectedColor[1] = this.value/100; 
-	});
-	document.getElementById('blueSlide').addEventListener('mouseup', 
-	        function(){
-			g_selectedColor[2] = this.value/100; 
-	});
-
-	document.getElementById('sizeSlide').addEventListener('mouseup', 
-	        function(){
-			g_selectedSize = this.value; 
-	});
-	document.getElementById('sideSlide').addEventListener('mouseup', 
-	        function(){
-			g_selectedSides = this.value; 
-	});
-
-	document.getElementById('draw').onclick = function(){
-		drawPicture();
-	};
-
-**/
-	// new stuff
-/**	document.getElementById('animationYellowOffButton').onclick = function() {g_yellowAnimation = false;};
-	document.getElementById('animationYellowOnButton').onclick = function() {g_yellowAnimation = true;};
-	
-	document.getElementById('animationMagentaOffButton').onclick = function() {g_magentaAnimation = false;};
-	document.getElementById('animationMagentaOnButton').onclick = function() {g_magentaAnimation = true;};**/
 
 	document.getElementById('animationBeakOffButton').onclick = function() {g_beakAnimation = false;};
 	document.getElementById('animationBeakOnButton').onclick = function() {g_beakAnimation = true;};
@@ -122,13 +62,18 @@ function addActionForHtmlUI(){
 	document.getElementById('animationWingsOffButton').onclick = function() {g_wingsAnimation = false;};
 	document.getElementById('animationWingsOnButton').onclick = function() {g_wingsAnimation = true;};
 
-
-
 	// angle slider event
 	document.getElementById('angleSlide').addEventListener('mousemove',function(){
 		g_globalAngle = this.value;
 		renderScene();
 	});
+
+	document.getElementById('angleYSlide').addEventListener('mousemove', function(){
+	    g_globalAngleY = this.value;
+	        renderScene();
+	});
+		
+
 
 /**	document.getElementById('yellowSlide').addEventListener('mousemove', function(){
 		g_yellowAngle = this.value;
@@ -154,27 +99,6 @@ function addActionForHtmlUI(){
 
 }
 
-/**
-function addActionForHtmlUI(){
-	document.getElementByID('clear').onclick = function(){
-		g_shapesList = [];
-		renderScene();
-	}
-	document.getElementById('pointButton').onclick = function(){
-		g_selectedType = POINT;
-	}; 
-	document.getElementById('triangleButton').onclick = function(){
-		g_selectedType = TRIANGLE;
-	};
-	document.getElementById('circleButton').onclick = function(){
-		g_selectedType = CIRCLE;
-	};
-
-
-	document.getElementByID
-
-}
-**/
 
 function main(){
 	setUpWebGL();
@@ -199,7 +123,6 @@ var g_seconds = performance.now()/1000 - g_startTime;
 
 function tick(){
 	g_seconds = performance.now()/1000 - g_startTime;
-	//console.log(performance.now());
 	updateAnimationAngles();
 	renderScene();
 	requestAnimationFrame(tick);
@@ -239,11 +162,6 @@ function connectVariablesToGLSL(){
 		return;
 	}
 
-/**	u_Size = gl.getUniformLocation(gl.program, 'u_Size');
-	if(!u_Size){
-		console.log('Failed to get storage location of u_Size');
-		return;
-	}**/
 }
 
 function sendTextToHTML(text, htmlID){
@@ -277,7 +195,9 @@ function renderScene(){
 	var startTime = performance.now();
 
 	// pass the matrix to u_ModelMatrix attribute
-	var globalRotMat=new Matrix4().rotate(g_globalAngle,0,1,0);
+	var globalRotMat=new Matrix4()
+		.rotate(g_globalAngle,0,1,0)
+		.rotate(g_globalAngleY,1,0,0);
 	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
 	//clear <canvas>
@@ -346,7 +266,7 @@ function renderScene(){
 
 	// redthing
 	var redthing = new Cube();
-	redthing.color = [1,0.2,0,1];
+	redthing.color = [0.85,0.2,0,1];
 	redthing.matrix.setTranslate(-0.025,0.06,-0.35);
 	redthing.matrix.rotate(-5,1,0,0);
 	redthing.matrix.scale(0.1,0.1,.05);
@@ -354,7 +274,7 @@ function renderScene(){
 
 	// right wing
 	var rwing = new Cube();
-	rwing.color = [0,0,1,1];
+	rwing.color = [0.85,0.85,0.85,1];
 	rwing.matrix.setTranslate(0.24,0.1,-0.17);
 	rwing.matrix.rotate(85,1,0,0);
 	rwing.matrix.rotate(g_rwingAngle, 0,1,0);
@@ -363,7 +283,7 @@ function renderScene(){
 
 	// left wing
 	var lwing = new Cube();
-	lwing.color = [1,0,0,1];
+	lwing.color = [0.85,0.85,0.85,1];
 	lwing.matrix.setTranslate(-0.24,0.1,-0.17);
 	lwing.matrix.rotate(85,1,0,0);
 	lwing.matrix.rotate(-g_rwingAngle, 0,1,0);
