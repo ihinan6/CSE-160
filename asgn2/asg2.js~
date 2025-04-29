@@ -17,12 +17,14 @@ let g_selectedSides = 3;
 var g_shapesList = [];
 
 let g_globalAngle = 0;
-let g_yellowAngle = 0;
-let g_magentaAngle = 0;
+//let g_yellowAngle = 0;
+//let g_magentaAngle = 0;
+let g_rwingAngle = 0;
 let g_beakAngle = 0;
-let g_yellowAnimation = false;
-let g_magentaAnimation = false;
+//let g_yellowAnimation = false;
+//let g_magentaAnimation = false;
 let g_beakAnimation = false;
+let g_wingsAnimation = false;
 
 var VSHADER_SOURCE =
 	    'attribute vec4 a_Position;\n' +
@@ -108,14 +110,17 @@ function addActionForHtmlUI(){
 
 **/
 	// new stuff
-	document.getElementById('animationYellowOffButton').onclick = function() {g_yellowAnimation = false;};
+/**	document.getElementById('animationYellowOffButton').onclick = function() {g_yellowAnimation = false;};
 	document.getElementById('animationYellowOnButton').onclick = function() {g_yellowAnimation = true;};
 	
 	document.getElementById('animationMagentaOffButton').onclick = function() {g_magentaAnimation = false;};
-	document.getElementById('animationMagentaOnButton').onclick = function() {g_magentaAnimation = true;};
+	document.getElementById('animationMagentaOnButton').onclick = function() {g_magentaAnimation = true;};**/
 
 	document.getElementById('animationBeakOffButton').onclick = function() {g_beakAnimation = false;};
 	document.getElementById('animationBeakOnButton').onclick = function() {g_beakAnimation = true;};
+
+	document.getElementById('animationWingsOffButton').onclick = function() {g_wingsAnimation = false;};
+	document.getElementById('animationWingsOnButton').onclick = function() {g_wingsAnimation = true;};
 
 
 
@@ -125,7 +130,7 @@ function addActionForHtmlUI(){
 		renderScene();
 	});
 
-	document.getElementById('yellowSlide').addEventListener('mousemove', function(){
+/**	document.getElementById('yellowSlide').addEventListener('mousemove', function(){
 		g_yellowAngle = this.value;
 		renderScene();
 
@@ -134,12 +139,18 @@ function addActionForHtmlUI(){
 	document.getElementById('magentaSlide').addEventListener('mousemove', function(){
 		g_magentaAngle = this.value;
 		renderScene();
-	});
+	});**/
 
 	document.getElementById('beakSlide').addEventListener('mousemove', function(){
 		g_beakAngle = this.value;
 		renderScene();
 	});
+
+	document.getElementById('rwingSlide').addEventListener('mousemove', function(){
+		g_rwingAngle = this.value;
+		renderScene();
+	});
+
 
 }
 
@@ -228,11 +239,11 @@ function connectVariablesToGLSL(){
 		return;
 	}
 
-	u_Size = gl.getUniformLocation(gl.program, 'u_Size');
+/**	u_Size = gl.getUniformLocation(gl.program, 'u_Size');
 	if(!u_Size){
 		console.log('Failed to get storage location of u_Size');
 		return;
-	}
+	}**/
 }
 
 function sendTextToHTML(text, htmlID){
@@ -245,21 +256,17 @@ function sendTextToHTML(text, htmlID){
 }
 
 function updateAnimationAngles(){
-	if(g_yellowAnimation){
+/**	if(g_yellowAnimation){
 		g_yellowAngle = (45*Math.sin(g_seconds));
 	}
 	if(g_magentaAnimation){
 		g_magentaAngle = (45*Math.sin(3*g_seconds));
-	}
+	}**/
 	if(g_beakAnimation){
-		g_beakAngle = Math.abs((45*Math.sin(3*g_seconds)));
-/**
-		if((45*Math.sin(3*g_seconds)) >0){
-			g_beakAngle = (45*Math.sin(3*g_seconds));
-		}
-		console.log("angle " + g_beakAngle);**/
-
-	//	g_beakAngle = (45*Math.sin(3*g_seconds));
+		g_beakAngle = Math.abs((45*Math.sin(5*g_seconds)));
+	}
+	if(g_wingsAnimation){
+		g_rwingAngle = Math.abs((65*Math.sin(5*g_seconds)));
 	}
 }
 
@@ -321,7 +328,7 @@ function renderScene(){
 	beak2.render();
 
 
-	// reye
+	// right eye
 	var reye = new Cube();
 	reye.color = [0.1,0.1,0.1,1];
 	reye.matrix.setTranslate(-0.075,0.26,-0.35);
@@ -329,7 +336,7 @@ function renderScene(){
 	reye.matrix.scale(0.05,0.05,0.02);
 	reye.render();
 
-	// leye
+	// left eye
 	var leye = new Cube();
 	leye.color = [0.1,0.1,0.1,1];
 	leye.matrix.setTranslate(0.075,0.26,-0.35);
@@ -344,6 +351,25 @@ function renderScene(){
 	redthing.matrix.rotate(-5,1,0,0);
 	redthing.matrix.scale(0.1,0.1,.05);
 	redthing.render();
+
+	// right wing
+	var rwing = new Cube();
+	rwing.color = [0,0,1,1];
+	rwing.matrix.setTranslate(0.24,0.1,-0.17);
+	rwing.matrix.rotate(85,1,0,0);
+	rwing.matrix.rotate(g_rwingAngle, 0,1,0);
+	rwing.matrix.scale(0.05,0.45,0.25);
+	rwing.render();
+
+	// left wing
+	var lwing = new Cube();
+	lwing.color = [1,0,0,1];
+	lwing.matrix.setTranslate(-0.24,0.1,-0.17);
+	lwing.matrix.rotate(85,1,0,0);
+	lwing.matrix.rotate(-g_rwingAngle, 0,1,0);
+	lwing.matrix.scale(0.05,0.45,0.25);
+	lwing.render();
+
 
 
 /**
