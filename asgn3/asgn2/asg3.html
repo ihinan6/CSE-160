@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Blocky Animal</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+
+    <br>
+	
+    <p id="numdot">
+    </p>
+
+    <p><button type="button" id="clear">Clear</button></p>
+    
+
+    <button id="resetCameraButton">Reset Camera</button>
+    <p>
+    Camera Angle (X)<input type="range" min="-180" max="180" value="20" class="slider" id="angleSlide">
+    (Y)<input type="range" min = "-180" max="180" value="20" class="slider" id="angleYSlide">
+    <p>
+<!--
+    <p>
+    Yellow <input type="range" min="-45" max="45" value="0" class="slider" id="yellowSlide">
+	Animation:
+    <button type="button" id="animationYellowOnButton">ON</button>
+    <button type="button" id="animationYellowOffButton">OFF</button>
+
+
+    <p>
+    Magenta <input type="range" min="-45" max="45" value="0" class="slider" id="magentaSlide">
+    	Animation:
+    <button type="button" id="animationMagentaOnButton">ON</button>
+    <button type="button" id="animationMagentaOffButton">OFF</button>
+-->
+    <p>
+    Bawk <input type="range" min="0" max="45" value="0" class="slider" id="beakSlide">
+    	Animation:
+    <button type="button" id="animationBeakOnButton">ON</button>
+    <button type="button" id="animationBeakOffButton">OFF</button>
+
+    <p>
+    Flap <input type="range" min="0" max="65" value="0" class="slider" id="rwingSlide">
+    	Animation:
+    <button type="button" id="animationWingsOnButton">ON</button>
+    <button type="button" id="animationWingsOffButton">OFF</button>
+
+
+    <p>
+    Run <input type="range" min="-45" max="45" value="0" class="slider" id="legsSlide">
+ 	Animation:
+    <button type="button" id="animationLegsOnButton">ON</button>
+    <button type="button" id="animationLegsOffButton">OFF</button>
+
+    <p>Fly: 
+    <button type="button" id="animationFlyOnButton">ON</button>
+    <button type="button" id="animationFlyOffButton">OFF</button>
+
+    <br>
+
+
+
+    <script src="lib/cuon-matrix-cse160.js"></script>
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Point.js"></script>
+    <script src="Cube.js"></script>
+    <script src="asg3.js"></script>
+    <script type=text/javascript src="Camera.js"></script>
+  </body>
+</html>

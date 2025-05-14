@@ -1,0 +1,697 @@
+const POINT = 0;
+const TRIANGLE = 1;
+const CIRCLE = 2;
+
+let canvas;
+let gl;
+let a_Position;
+let u_FragColor;
+let u_ModelMatrix;
+let u_GlobalRotateMatrix;
+let g_selectedColor = [1,1,1,1]
+let g_selectedSides = 3;
+var g_shapesList = [];
+let g_globalAngleY = -10;
+var u_Clicked;
+
+let a_UV;
+let u_ProjectionMatrix;
+let u_ViewMatrix;
+var u_Sampler0;
+var u_whichTexture;
+
+let g_globalAngle = 35;
+let g_rwingAngle = 0;
+let g_beakAngle = 0;
+let g_legsAngle = 0;
+let g_beakAnimation = false;
+let g_wingsAnimation = false;
+let g_legsAnimation = false;
+let g_flyAnimation = false;
+
+var VSHADER_SOURCE =`
+   precision mediump float;
+   attribute vec4 a_Position;
+   attribute vec2 a_UV;
+   varying vec2 v_UV;
+   uniform mat4 u_ModelMatrix;
+   uniform mat4 u_GlobalRotateMatrix;
+   uniform mat4 u_ViewMatrix;
+   uniform mat4 u_ProjectionMatrix;
+   uniform bool u_Clicked; // when mouse is pressed
+   void main() {
+		if(u_Clicked){
+			vec4(1,1,1,1);
+		}
+		gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+		v_UV = a_UV;
+   }`
+
+var FSHADER_SOURCE =`
+	precision mediump float;
+    varying vec2 v_UV;
+	uniform vec4 u_FragColor;
+	uniform sampler2D u_Sampler0;
+	uniform int u_whichTexture;
+	void main() {
+
+		if (u_whichTexture == -2){
+			gl_FragColor = u_FragColor; // use color
+		}else if(u_whichTexture == -1){
+			// use UV debug color
+			gl_FragColor = vec4(v_UV, 1.0, 1.0); 
+		}else if(u_whichTexture == 0){
+			// use texture0
+			gl_FragColor = texture2D(u_Sampler0, v_UV);
+		}else{
+			// error, put redish
+			gl_FragColor = vec4(1,.2,.2,1);
+		}
+		
+    }`
+
+
+function setUpWebGL(){
+	canvas = document.getElementById('webgl');
+	if(!canvas){
+		console.log('Failed to get <canvas> element');
+		return;
+	}
+	gl = getWebGLContext(canvas);
+	if(!gl){
+		console.log('Failed to get rendering context for WebGL');
+		return;
+	}
+	gl.enable(gl.DEPTH_TEST);
+}
+
+
+function addActionForHtmlUI(){
+	document.getElementById('clear').onclick = function(){
+		g_shapesList = [];
+		renderScene();
+	};
+
+	document.getElementById('animationBeakOffButton').onclick = function() {g_beakAnimation = false;};
+	document.getElementById('animationBeakOnButton').onclick = function() {g_beakAnimation = true;};
+
+	document.getElementById('animationWingsOffButton').onclick = function() {g_wingsAnimation = false;};
+	document.getElementById('animationWingsOnButton').onclick = function() {g_wingsAnimation = true;};
+
+	document.getElementById('animationLegsOffButton').onclick = function() {g_legsAnimation = false;};
+	document.getElementById('animationLegsOnButton').onclick = function() {g_legsAnimation = true;};
+
+	document.getElementById('animationFlyOffButton').onclick = function() {g_flyAnimation = false;};
+	document.getElementById('animationFlyOnButton').onclick = function() {g_flyAnimation = true;};
+
+
+
+	// angle slider event
+	document.getElementById('angleSlide').addEventListener('mousemove',function(){
+		g_globalAngle = this.value;
+		renderScene();
+	});
+
+	document.getElementById('angleYSlide').addEventListener('mousemove', function(){
+	    g_globalAngleY = this.value;
+	        renderScene();
+	});
+		
+
+
+/**	document.getElementById('yellowSlide').addEventListener('mousemove', function(){
+		g_yellowAngle = this.value;
+		renderScene();
+
+	});
+
+	document.getElementById('magentaSlide').addEventListener('mousemove', function(){
+		g_magentaAngle = this.value;
+		renderScene();
+	});**/
+
+	document.getElementById('beakSlide').addEventListener('mousemove', function(){
+		g_beakAngle = this.value;
+		renderScene();
+	});
+
+	document.getElementById('rwingSlide').addEventListener('mousemove', function(){
+		g_rwingAngle = this.value;
+		renderScene();
+	});
+
+	document.getElementById('legsSlide').addEventListener('mousemove', function(){
+		g_legsAngle = this.value;
+		renderScene();
+	});
+
+
+	document.getElementById('animationFlyOnButton').onclick = function() {
+		    g_beakAnimation = true;
+		    g_wingsAnimation = true;
+		    g_legsAnimation = true;
+	};
+
+	document.getElementById('animationFlyOffButton').onclick = function() {
+		    g_beakAnimation = false;
+		    g_wingsAnimation = false;
+		    g_legsAnimation = false;
+	};
+
+	document.getElementById('resetCameraButton').onclick = function() {
+		g_globalAngle = 35;
+	        g_globalAngleY = -10;
+	        document.getElementById('angleSlide').value = 0;
+		document.getElementById('angleYSlide').value = 0;
+	        renderScene();
+	};
+
+}
+
+function initTextures() {
+//   var texture = gl.createTexture();   // Create a texture object
+//   if (!texture) {
+//     console.log('Failed to create the texture object');
+//     return false;
+//   }
+
+
+  var image = new Image();  // Create the image object
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  // Register the event handler to be called on loading an image
+  image.onload = function(){ sendImageToTEXTURE0(image); };
+  // Tell the browser to load an image
+  image.src = 'worn_tile_floor_disp_4k.png';
+
+  // add more textures later
+  return true;
+}
+
+function sendImageToTEXTURE0(image) {
+	var texture = gl.createTexture();
+	if (!texture){
+		console.log('failed to create texture object');
+		return false;
+	}
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler0, 0);
+  
+  //gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+
+  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+}
+
+
+
+function main(){
+	setUpWebGL();
+	connectVariablesToGLSL();
+	addActionForHtmlUI();
+
+	g_camera = new Camera();
+	document.onkeydown = keydown;
+
+	//canvas.onkeydown = click;
+	canvas.onmousemove = function(ev){
+		mouseCam(ev);
+	}
+	canvas.onmousedown = function(ev){
+		check(ev);
+	}
+
+	initTextures();
+
+	gl.clearColor(0,0,0,1);
+	//gl.clear(gl.COLOR_BUFFER_BIT);
+	//renderScene();
+	requestAnimationFrame(tick);
+}
+
+function check(ev) {
+  var picked = false;
+  var x = ev.clientX, y = ev.clientY;
+  var rect = ev.target.getBoundingClientRect();
+  if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) { // inside canvas
+     var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
+     gl.uniform1i(u_Clicked, 1);  // Pass true to u_Clicked
+     // Read pixel at the clicked position
+     var pixels = new Uint8Array(4); // Array for storing the pixel value
+     gl.readPixels(x_in_canvas, y_in_canvas, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+     console.log(pixels[0]);
+     if (pixels[0] == 255) // The mouse in on cube if R(pixels[0]) is 255
+       picked = true;
+
+     gl.uniform1i(u_Clicked, 0);  // Pass false to u_Clicked(rewrite the cube)
+  }
+
+}
+
+var g_startTime = performance.now()/1000;
+var g_seconds = performance.now()/1000 - g_startTime;
+
+
+function tick(){
+	g_seconds = performance.now()/1000 - g_startTime;
+	updateAnimationAngles();
+	renderScene();
+	requestAnimationFrame(tick);
+}
+
+function connectVariablesToGLSL(){
+	if(!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)){
+		console.log('Failed to initialize shaders');
+		return;
+	}
+
+	a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+	if(a_Position < 0){
+		console.log('Failed to get storage location of a_Position');
+		return;
+	}
+
+
+	u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+	if(!u_FragColor){
+		console.log('Failed to get storage location of u_FragColor');
+		return;
+	}
+
+	//get the storage location of u_ModelMatrix
+	u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+	if(!u_ModelMatrix){
+		console.log('Failed to get the storage location of u_ModelMatrix');
+		return;
+	}
+
+	var identityM = new Matrix4();
+	gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
+	
+	u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
+	if(!u_GlobalRotateMatrix){
+		console.log('Failed to get storage location of u_GlobalRotateMatrix');
+		return;
+	}
+
+	a_UV = gl.getAttribLocation(gl.program, 'a_UV');
+	if (a_UV < 0) {
+		console.log('Failed to get the storage location of a_UV');
+		return;
+	}
+
+	u_ViewMatrix = gl.getUniformLocation(gl.program,'u_ViewMatrix');
+	if (!u_ViewMatrix) {
+		console.log('Failed to get u_ViewMatrix');
+		return;
+	}
+
+	u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
+	if (!u_ProjectionMatrix) {
+		console.log('Failed to get u_ProjectionMatrix');
+		return;
+	}
+
+	// Get the storage location of u_Sampler
+	var u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+	if (!u_Sampler0) {
+		console.log('Failed to get the storage location of u_Sampler0');
+		return false;
+	}
+
+	u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+	if (!u_whichTexture) {
+		console.log('Failed to get u_whichTexture');
+		return;
+	}
+
+	u_Clicked = gl.getUniformLocation(gl.program, 'u_Clicked');
+	if (!u_Clicked) {
+		console.log('Failed to get u_Clicked');
+		return;
+	}
+
+
+}
+
+function sendTextToHTML(text, htmlID){
+	var htmlElm = document.getElementById(htmlID);
+	if(!htmlElm){
+		console.log("Failed to get " + htmlID + " from HTML");
+		return;
+	}
+	htmlElm.innerHTML = text;
+}
+
+function updateAnimationAngles(){
+/**	if(g_yellowAnimation){
+		g_yellowAngle = (45*Math.sin(g_seconds));
+	}
+	if(g_magentaAnimation){
+		g_magentaAngle = (45*Math.sin(3*g_seconds));
+	}**/
+	if(g_beakAnimation){
+		g_beakAngle = Math.abs((45*Math.sin(5*g_seconds)));
+	}
+	if(g_wingsAnimation){
+		g_rwingAngle = Math.abs((70*Math.sin(7*g_seconds)));
+	}
+	if(g_legsAnimation){
+		g_legsAngle = (45*Math.sin(7*g_seconds));
+	}
+}
+
+
+function renderScene(){
+
+	// check the time at the start of this function
+	var startTime = performance.now();
+
+
+	//--------------------------------
+	// var projMat=new Matrix4();
+	// projMat.setPerspective(60, canvas.width/canvas.height, .1, 100);
+	// gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+	// var viewMat=new Matrix4();
+	// viewMat.setLookAt(0,0,-3, 0,0,0, 0,1,0); //eye,at,up
+	// gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+	// var globalRotMat=new Matrix4().rotate(g_globalAngle,0,1,0);
+	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+
+	   // Pass the projection matrix
+   var projMat = g_camera.projMat;
+   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+   // Pass the view matrix
+   var viewMat = g_camera.viewMat;
+   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+   // Pass the matrix to u_ModelMatrix attribute
+   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0,1,0);
+   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+
+
+	//----------------------------------
+
+	// let projectionMatrix = new Matrix4();
+	// projectionMatrix.setPerspective(15, canvas.width / canvas.height, 1, 10);
+
+	// let viewMatrix = new Matrix4();
+	// viewMatrix.lookAt(3, 3, -7, 0, 0, 0, 0, 1, 0);
+
+	// let globalRotateMatrix = new Matrix4();
+	// globalRotateMatrix.setRotate(0, 0, 0, 0);  // or however you're using this
+
+	// let modelMatrix = new Matrix4();
+	// modelMatrix.setIdentity();  // or object-specific transform
+	// modelMatrix.setTranslate(0, 0, 0); 
+	// modelMatrix.scale(2, 2, 2); 
+
+	// gl.uniformMatrix4fv(u_ProjectionMatrix, false, projectionMatrix.elements);
+	// gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotateMatrix.elements);
+	// gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+
+	// pass the matrix to u_ModelMatrix attribute
+	// var globalRotMat=new Matrix4()
+	// 	.rotate(g_globalAngle,0,1,0)
+	// 	.rotate(g_globalAngleY,1,0,0);
+	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+
+	//clear <canvas>
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT);	
+
+
+	var len = g_shapesList.length;
+
+	for (var a = 0; a < len; a += 1){
+		g_shapesList[a].render();
+	}
+	
+	// test triangle
+	//drawTriangle3D( [-1.0,0.0,0.0, -0.5,-1.0,0.0, 0.0,0.0,0.0] );
+	
+	// draw the body cube
+	var body = new Cube();
+	body.color = [0.9,0.9,0.9,1];
+	body.textureNum = -2;
+	body.matrix.setTranslate(-0.2,-0.2,-0.2);
+	body.matrix.rotate(-5,1,0,0);
+	body.matrix.scale(0.45,.35,.55);
+	body.render();
+
+	// head
+	var head = new Cube();
+	head.color = [0.85,0.85,0.85,1];
+	head.matrix.setTranslate(-0.075,0.05,-0.31);
+	head.matrix.rotate(-5,1,0,0);
+	head.matrix.scale(0.2,0.3,.15);
+	head.render();
+
+	// beak1
+	var beak1 = new Cube();
+	beak1.color = [1,0.7,0,1];
+	beak1.matrix.setTranslate(-0.075,0.2,-0.469);
+	beak1.matrix.rotate(-5,1,0,0);
+	beak1.matrix.scale(0.2,0.05,.15);
+	beak1.render();
+
+	// beak2
+	var beak2 = new Cube();
+	beak2.color = [1,0.6,0,1];
+	beak2.matrix.setTranslate(-0.075,0.21,-0.32);
+	beak2.matrix.rotate(175,1,0,0);
+	beak2.matrix.rotate(-g_beakAngle,1,0,0);
+	beak2.matrix.scale(0.2,0.05,0.15);
+	beak2.render();
+
+
+	// right eye
+	var reye = new Cube();
+	reye.color = [0.1,0.1,0.1,1];
+	reye.matrix.setTranslate(-0.075,0.26,-0.35);
+	reye.matrix.rotate(-5,1,0,0);
+	reye.matrix.scale(0.05,0.05,0.02);
+	reye.render();
+
+	// left eye
+	var leye = new Cube();
+	leye.color = [0.1,0.1,0.1,1];
+	leye.matrix.setTranslate(0.075,0.26,-0.35);
+	leye.matrix.rotate(-5,1,0,0);
+	leye.matrix.scale(0.05,0.05,.02);
+	leye.render();
+
+	// redthing
+	var redthing = new Cube();
+	redthing.color = [0.85,0.2,0,1];
+	redthing.matrix.setTranslate(-0.025,0.06,-0.35);
+	redthing.matrix.rotate(-5,1,0,0);
+	redthing.matrix.scale(0.1,0.1,.05);
+	redthing.render();
+
+	// right wing
+	var rwing = new Cube();
+	rwing.color = [0.85,0.85,0.85,1];
+	rwing.matrix.setTranslate(0.24,0.1,-0.17);
+	rwing.matrix.rotate(85,1,0,0);
+	rwing.matrix.rotate(g_rwingAngle, 0,1,0);
+	rwing.matrix.scale(0.05,0.45,0.25);
+	rwing.render();
+
+	// left wing
+	var lwing = new Cube();
+	lwing.color = [0.85,0.85,0.85,1];
+	lwing.matrix.setTranslate(-0.24,0.1,-0.17);
+	lwing.matrix.rotate(85,1,0,0);
+	lwing.matrix.rotate(-g_rwingAngle, 0,1,0);
+	lwing.matrix.scale(0.05,0.45,0.25);
+	lwing.render();
+
+	// right leg
+	var rleg = new Cube();
+	rleg.color = [1,0.7,0,1];
+	rleg.matrix.setTranslate(0.15,-0.14,0.1);
+	rleg.matrix.rotate(160,1,0,0);
+	rleg.matrix.rotate(g_legsAngle,1,0,0);
+	var rjoint = new Matrix4(rleg.matrix);
+	rleg.matrix.scale(0.05,0.2,.05);
+	rleg.render();
+
+	var rleg2 = new Cube();
+	rleg2.color = [1,0.6,0,1];
+	rleg2.matrix = rjoint;
+	rleg2.matrix.translate(0,0.28,0.124);
+	rleg2.matrix.rotate(220,1,0,0);
+	var rjoint2 = new Matrix4(rleg2.matrix);
+	rleg2.matrix.scale(0.05,0.15,.05);
+	rleg2.render();
+
+	var rfoot = new Cube();
+	rfoot.color = [1,0.6,0,1];
+	rfoot.matrix = rjoint2;
+	rfoot.matrix.translate(-0.028,0,-0.1);
+	rfoot.matrix.rotate(0,1,0,0);
+	rfoot.matrix.scale(0.1,0.05,0.1);
+	rfoot.render();
+
+	// left leg
+	var lleg = new Cube();
+	lleg.color = [1,0.7,0,1];
+	lleg.matrix.setTranslate(-0.15,-0.14,0.1);
+	lleg.matrix.rotate(160,1,0,0);
+	lleg.matrix.rotate(-g_legsAngle,1,0,0);
+	var ljoint = new Matrix4(lleg.matrix);
+	lleg.matrix.scale(0.05,0.2,.05);
+	lleg.render();
+
+	var lleg2 = new Cube();
+	lleg2.color = [1,0.6,0,1];
+	lleg2.matrix = ljoint;
+	lleg2.matrix.translate(0,0.28,0.124);
+	lleg2.matrix.rotate(220,1,0,0);
+	var ljoint2 = new Matrix4(lleg2.matrix);
+	lleg2.matrix.scale(0.05,0.15,.05);
+	lleg2.render();
+
+	var lfoot = new Cube();
+	lfoot.color = [1,0.6,0,1];
+	lfoot.matrix = ljoint2;
+	lfoot.matrix.translate(-0.028,0,-0.1);
+	lfoot.matrix.rotate(0,1,0,0);
+	lfoot.matrix.scale(0.1,0.05,0.1);
+	lfoot.render();
+
+
+
+	
+
+
+
+/**
+	// draw left arm
+	var leftArm = new Cube();
+	leftArm.color = [1,1,0,1];
+	leftArm.matrix.setTranslate(0, -.5, 0.0);
+	leftArm.matrix.rotate(-5,1,0,0);
+	leftArm.matrix.rotate(-g_yellowAngle,0,0,1);
+/**
+	if(g_yellowAnimation){
+		leftArm.matrix.rotate(45*Math.sin(g_seconds),0,0,1);
+	}else{
+		leftArm.matrix.rotate(-g_yellowAngle,0,0,1);
+	}
+
+	var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
+	leftArm.matrix.scale(0.25,.7,.5);
+	leftArm.matrix.translate(-.5,0,0);
+	leftArm.render();
+
+	// test box
+	var box = new Cube();
+	box.color = [1,0,1,1];
+	box.matrix = yellowCoordinatesMat;
+	box.matrix.translate(0,0.65,0);
+	box.matrix.rotate(g_magentaAngle,0,0,1);
+	box.matrix.scale(.3,.3,.3);
+	box.matrix.translate(-0.5,0,-0.001);
+//	box.matrix.translate(-.1,.1,0,0);
+//	box.matrix.rotate(-30,1,0,0);
+//	box.matrix.scale(.2,.4,.2);
+	box.render();
+**/
+
+	// check the time at the end of the function and show on webpage
+	var duration = performance.now() - startTime;
+	sendTextToHTML( " ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration), "numdot");
+
+}
+
+
+function click(ev){
+	let [x,y] = convertCoordEventToWebGL(ev);
+	let point;
+	if(g_selectedType == POINT){
+		point = new Point();
+	}else if(g_selectedType == TRIANGLE){
+		point = new Triangle();
+	}else{
+		point = new Circle();
+		point.sides = g_selectedSides;
+	}
+
+	point.position = [x,y];
+	point.color = g_selectedColor.slice();
+	g_shapesList.push(point);
+
+	renderScene();
+}
+
+
+function convertCoordEventToWebGL(ev){
+	var x = ev.clientX;
+	var y = ev.clientY;
+	var rect = ev.target.getBoundingClientRect();
+	x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+	y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+	return ([x,y]);
+}
+
+function convertCoordinatesEventToGL(ev){
+   var x = ev.clientX; // x coordinate of a mouse pointer
+   var y = ev.clientY; // y coordinate of a mouse pointer
+   var rect = ev.target.getBoundingClientRect() ;
+
+   // set coordinates based on origin
+   x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+   y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+
+   // Print coordinate in console
+   // console.log("("+x+","+y+")");
+
+   return [x,y];
+}
+
+
+function mouseCam(ev){
+   coord = convertCoordinatesEventToGL(ev);
+   if(coord[0] < 0.5){ // left side
+      g_camera.panMLeft(coord[0]*-10);
+   } else{
+      g_camera.panMRight(coord[0]*-10);
+   }
+}
+
+function keydown(ev){
+   if(ev.keyCode==39 || ev.keyCode == 68){ // Right Arrow or D
+      g_camera.right();
+   } else if (ev.keyCode==37 || ev.keyCode == 65){ // Left Arrow or A
+      g_camera.left();
+   } else if (ev.keyCode==38 || ev.keyCode == 87){ // up Arrow or W
+      g_camera.forward();
+   } else if (ev.keyCode==40 || ev.keyCode == 83){ // down Arrow or S
+      g_camera.back();
+   } else if (ev.keyCode==81){ // Q
+      g_camera.panLeft();
+   } else if (ev.keyCode==69){ // E
+      g_camera.panRight();
+   }
+   renderScene();
+}
