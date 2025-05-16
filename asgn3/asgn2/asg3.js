@@ -209,50 +209,69 @@ function initTextures() {
 }
 
 function sendImageToTEXTURE0(image) {
-	var texture = gl.createTexture();
-	if (!texture){
-		console.log('failed to create texture object');
-		return false;
-	}
+   var texture = gl.createTexture();
+   if(!texture){
+      console.log('Failed to create the texture object');
+      return false;
+   }
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
   // Enable texture unit0
   gl.activeTexture(gl.TEXTURE0);
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Set the texture image
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-  
+
+  if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+     gl.generateMipmap(gl.TEXTURE_2D);
+  } else {
+     // Set the texture parameters
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  }
+
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
-}
 
+
+  console.log("Finished loadTexture");
+}
+// ================================SKY
 function sendImageToTEXTURE1(image) {
-	var texture = gl.createTexture();
-	if (!texture){
-		console.log('failed to create texture object');
-		return false;
-	}
+   var texture = gl.createTexture();
+   if(!texture){
+      console.log('Failed to create the texture object');
+      return false;
+   }
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
   // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE0);
+  gl.activeTexture(gl.TEXTURE1);
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Set the texture image
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-  
-  // Set the texture unit 0 to the sampler
+
+  if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+     gl.generateMipmap(gl.TEXTURE_2D);
+  } else {
+     // Set the texture parameters
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  }
+
+  // Set the texture unit 1 to the sampler
   gl.uniform1i(u_Sampler1, 1);
+
+
+  console.log("Finished loadTexture1");
 }
 
 
+function isPowerOf2(value) {
+  return (value & (value - 1)) == 0;
+}
 
 
 function main(){
@@ -356,13 +375,13 @@ function connectVariablesToGLSL(){
 	}
 
 	// Get the storage location of u_Sampler
-	var u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+	u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
 	if (!u_Sampler0) {
 		console.log('Failed to get the storage location of u_Sampler0');
 		return false;
 	}
 
-	var u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+	u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
 	if (!u_Sampler1) {
 		console.log('Failed to get the storage location of u_Sampler1');
 		return false;
