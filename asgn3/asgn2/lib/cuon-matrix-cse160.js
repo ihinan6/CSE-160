@@ -807,8 +807,8 @@ class Matrix4 {
       rls = 1 / Math.sqrt(sx*sx + sy*sy + sz*sz);
       sx *= rls;
       sy *= rls;
-      sz *= rls;
 
+      sz *= rls;
       // Calculate cross product of s and f.
       ux = sy * fz - sz * fy;
       uy = sz * fx - sx * fz;

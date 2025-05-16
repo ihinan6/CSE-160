@@ -1,7 +1,3 @@
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-
 let canvas;
 let gl;
 let a_Position;
@@ -11,7 +7,7 @@ let u_GlobalRotateMatrix;
 let g_selectedColor = [1,1,1,1]
 let g_selectedSides = 3;
 var g_shapesList = [];
-let g_globalAngleY = -10;
+let g_globalAngleY = 0;
 var u_Clicked;
 
 let a_UV;
@@ -19,8 +15,10 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 var u_Sampler0;
 var u_whichTexture;
+var g_camera;
+var u_Sampler1;
 
-let g_globalAngle = 35;
+let g_globalAngle = 0;
 let g_rwingAngle = 0;
 let g_beakAngle = 0;
 let g_legsAngle = 0;
@@ -28,6 +26,10 @@ let g_beakAnimation = false;
 let g_wingsAnimation = false;
 let g_legsAnimation = false;
 let g_flyAnimation = false;
+
+var g_startTime = performance.now()/1000;
+var g_seconds = performance.now()/1000 - g_startTime;
+
 
 var VSHADER_SOURCE =`
    precision mediump float;
@@ -52,6 +54,7 @@ var FSHADER_SOURCE =`
     varying vec2 v_UV;
 	uniform vec4 u_FragColor;
 	uniform sampler2D u_Sampler0;
+	uniform sampler2D u_Sampler1;
 	uniform int u_whichTexture;
 	void main() {
 
@@ -63,6 +66,9 @@ var FSHADER_SOURCE =`
 		}else if(u_whichTexture == 0){
 			// use texture0
 			gl_FragColor = texture2D(u_Sampler0, v_UV);
+		}else if(u_whichTexture == 1){
+			// use texture1
+			gl_FragColor = texture2D(u_Sampler1, v_UV);
 		}else{
 			// error, put redish
 			gl_FragColor = vec4(1,.2,.2,1);
@@ -159,8 +165,8 @@ function addActionForHtmlUI(){
 	};
 
 	document.getElementById('resetCameraButton').onclick = function() {
-		g_globalAngle = 35;
-	        g_globalAngleY = -10;
+		g_globalAngle = 0;
+	        g_globalAngleY = 0;
 	        document.getElementById('angleSlide').value = 0;
 		document.getElementById('angleYSlide').value = 0;
 	        renderScene();
@@ -181,10 +187,22 @@ function initTextures() {
     console.log('Failed to create the image object');
     return false;
   }
+  var image1 = new Image();  // Create the image object
+  if (!image1) {
+    console.log('Failed to create the image1 object');
+    return false;
+  }
+
+
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE0(image); };
   // Tell the browser to load an image
   image.src = 'worn_tile_floor_disp_4k.png';
+
+  // Register the event handler to be called on loading an image
+  image1.onload = function(){ sendImageToTEXTURE1(image1); };
+  // Tell the browser to load an image
+  image1.src = 'worn_tile_floor_diff_4k.jpg';
 
   // add more textures later
   return true;
@@ -210,11 +228,30 @@ function sendImageToTEXTURE0(image) {
   
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler0, 0);
-  
-  //gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
-
-  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
 }
+
+function sendImageToTEXTURE1(image) {
+	var texture = gl.createTexture();
+	if (!texture){
+		console.log('failed to create texture object');
+		return false;
+	}
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler1, 1);
+}
+
 
 
 
@@ -235,10 +272,7 @@ function main(){
 	}
 
 	initTextures();
-
 	gl.clearColor(0,0,0,1);
-	//gl.clear(gl.COLOR_BUFFER_BIT);
-	//renderScene();
 	requestAnimationFrame(tick);
 }
 
@@ -258,11 +292,7 @@ function check(ev) {
 
      gl.uniform1i(u_Clicked, 0);  // Pass false to u_Clicked(rewrite the cube)
   }
-
 }
-
-var g_startTime = performance.now()/1000;
-var g_seconds = performance.now()/1000 - g_startTime;
 
 
 function tick(){
@@ -332,6 +362,12 @@ function connectVariablesToGLSL(){
 		return false;
 	}
 
+	var u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+	if (!u_Sampler1) {
+		console.log('Failed to get the storage location of u_Sampler1');
+		return false;
+	}
+
 	u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
 	if (!u_whichTexture) {
 		console.log('Failed to get u_whichTexture');
@@ -393,17 +429,18 @@ function renderScene(){
 	// var globalRotMat=new Matrix4().rotate(g_globalAngle,0,1,0);
 	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
-	   // Pass the projection matrix
-   var projMat = g_camera.projMat;
-   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+	// Pass the projection matrix
+	var projMat = g_camera.projMat;
+	gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
-   // Pass the view matrix
-   var viewMat = g_camera.viewMat;
-   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+	// Pass the view matrix
+	var viewMat = g_camera.viewMat;
+	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
-   // Pass the matrix to u_ModelMatrix attribute
-   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0,1,0);
-   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+	// Pass the matrix to u_ModelMatrix attribute
+	var globalRotMat = new Matrix4().rotate(g_globalAngle, 0,1,0).rotate(g_globalAngleY,1,0,0);
+
+	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
 
 	//----------------------------------
@@ -442,181 +479,11 @@ function renderScene(){
 	var len = g_shapesList.length;
 
 	for (var a = 0; a < len; a += 1){
-		g_shapesList[a].render();
+		g_shapesList[a].renderfast();
 	}
 	
-	// test triangle
-	//drawTriangle3D( [-1.0,0.0,0.0, -0.5,-1.0,0.0, 0.0,0.0,0.0] );
-	
-	// draw the body cube
-	var body = new Cube();
-	body.color = [0.9,0.9,0.9,1];
-	body.textureNum = -2;
-	body.matrix.setTranslate(-0.2,-0.2,-0.2);
-	body.matrix.rotate(-5,1,0,0);
-	body.matrix.scale(0.45,.35,.55);
-	body.render();
 
-	// head
-	var head = new Cube();
-	head.color = [0.85,0.85,0.85,1];
-	head.matrix.setTranslate(-0.075,0.05,-0.31);
-	head.matrix.rotate(-5,1,0,0);
-	head.matrix.scale(0.2,0.3,.15);
-	head.render();
-
-	// beak1
-	var beak1 = new Cube();
-	beak1.color = [1,0.7,0,1];
-	beak1.matrix.setTranslate(-0.075,0.2,-0.469);
-	beak1.matrix.rotate(-5,1,0,0);
-	beak1.matrix.scale(0.2,0.05,.15);
-	beak1.render();
-
-	// beak2
-	var beak2 = new Cube();
-	beak2.color = [1,0.6,0,1];
-	beak2.matrix.setTranslate(-0.075,0.21,-0.32);
-	beak2.matrix.rotate(175,1,0,0);
-	beak2.matrix.rotate(-g_beakAngle,1,0,0);
-	beak2.matrix.scale(0.2,0.05,0.15);
-	beak2.render();
-
-
-	// right eye
-	var reye = new Cube();
-	reye.color = [0.1,0.1,0.1,1];
-	reye.matrix.setTranslate(-0.075,0.26,-0.35);
-	reye.matrix.rotate(-5,1,0,0);
-	reye.matrix.scale(0.05,0.05,0.02);
-	reye.render();
-
-	// left eye
-	var leye = new Cube();
-	leye.color = [0.1,0.1,0.1,1];
-	leye.matrix.setTranslate(0.075,0.26,-0.35);
-	leye.matrix.rotate(-5,1,0,0);
-	leye.matrix.scale(0.05,0.05,.02);
-	leye.render();
-
-	// redthing
-	var redthing = new Cube();
-	redthing.color = [0.85,0.2,0,1];
-	redthing.matrix.setTranslate(-0.025,0.06,-0.35);
-	redthing.matrix.rotate(-5,1,0,0);
-	redthing.matrix.scale(0.1,0.1,.05);
-	redthing.render();
-
-	// right wing
-	var rwing = new Cube();
-	rwing.color = [0.85,0.85,0.85,1];
-	rwing.matrix.setTranslate(0.24,0.1,-0.17);
-	rwing.matrix.rotate(85,1,0,0);
-	rwing.matrix.rotate(g_rwingAngle, 0,1,0);
-	rwing.matrix.scale(0.05,0.45,0.25);
-	rwing.render();
-
-	// left wing
-	var lwing = new Cube();
-	lwing.color = [0.85,0.85,0.85,1];
-	lwing.matrix.setTranslate(-0.24,0.1,-0.17);
-	lwing.matrix.rotate(85,1,0,0);
-	lwing.matrix.rotate(-g_rwingAngle, 0,1,0);
-	lwing.matrix.scale(0.05,0.45,0.25);
-	lwing.render();
-
-	// right leg
-	var rleg = new Cube();
-	rleg.color = [1,0.7,0,1];
-	rleg.matrix.setTranslate(0.15,-0.14,0.1);
-	rleg.matrix.rotate(160,1,0,0);
-	rleg.matrix.rotate(g_legsAngle,1,0,0);
-	var rjoint = new Matrix4(rleg.matrix);
-	rleg.matrix.scale(0.05,0.2,.05);
-	rleg.render();
-
-	var rleg2 = new Cube();
-	rleg2.color = [1,0.6,0,1];
-	rleg2.matrix = rjoint;
-	rleg2.matrix.translate(0,0.28,0.124);
-	rleg2.matrix.rotate(220,1,0,0);
-	var rjoint2 = new Matrix4(rleg2.matrix);
-	rleg2.matrix.scale(0.05,0.15,.05);
-	rleg2.render();
-
-	var rfoot = new Cube();
-	rfoot.color = [1,0.6,0,1];
-	rfoot.matrix = rjoint2;
-	rfoot.matrix.translate(-0.028,0,-0.1);
-	rfoot.matrix.rotate(0,1,0,0);
-	rfoot.matrix.scale(0.1,0.05,0.1);
-	rfoot.render();
-
-	// left leg
-	var lleg = new Cube();
-	lleg.color = [1,0.7,0,1];
-	lleg.matrix.setTranslate(-0.15,-0.14,0.1);
-	lleg.matrix.rotate(160,1,0,0);
-	lleg.matrix.rotate(-g_legsAngle,1,0,0);
-	var ljoint = new Matrix4(lleg.matrix);
-	lleg.matrix.scale(0.05,0.2,.05);
-	lleg.render();
-
-	var lleg2 = new Cube();
-	lleg2.color = [1,0.6,0,1];
-	lleg2.matrix = ljoint;
-	lleg2.matrix.translate(0,0.28,0.124);
-	lleg2.matrix.rotate(220,1,0,0);
-	var ljoint2 = new Matrix4(lleg2.matrix);
-	lleg2.matrix.scale(0.05,0.15,.05);
-	lleg2.render();
-
-	var lfoot = new Cube();
-	lfoot.color = [1,0.6,0,1];
-	lfoot.matrix = ljoint2;
-	lfoot.matrix.translate(-0.028,0,-0.1);
-	lfoot.matrix.rotate(0,1,0,0);
-	lfoot.matrix.scale(0.1,0.05,0.1);
-	lfoot.render();
-
-
-
-	
-
-
-
-/**
-	// draw left arm
-	var leftArm = new Cube();
-	leftArm.color = [1,1,0,1];
-	leftArm.matrix.setTranslate(0, -.5, 0.0);
-	leftArm.matrix.rotate(-5,1,0,0);
-	leftArm.matrix.rotate(-g_yellowAngle,0,0,1);
-/**
-	if(g_yellowAnimation){
-		leftArm.matrix.rotate(45*Math.sin(g_seconds),0,0,1);
-	}else{
-		leftArm.matrix.rotate(-g_yellowAngle,0,0,1);
-	}
-
-	var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
-	leftArm.matrix.scale(0.25,.7,.5);
-	leftArm.matrix.translate(-.5,0,0);
-	leftArm.render();
-
-	// test box
-	var box = new Cube();
-	box.color = [1,0,1,1];
-	box.matrix = yellowCoordinatesMat;
-	box.matrix.translate(0,0.65,0);
-	box.matrix.rotate(g_magentaAngle,0,0,1);
-	box.matrix.scale(.3,.3,.3);
-	box.matrix.translate(-0.5,0,-0.001);
-//	box.matrix.translate(-.1,.1,0,0);
-//	box.matrix.rotate(-30,1,0,0);
-//	box.matrix.scale(.2,.4,.2);
-	box.render();
-**/
+	renderCubes();
 
 	// check the time at the end of the function and show on webpage
 	var duration = performance.now() - startTime;
@@ -626,7 +493,7 @@ function renderScene(){
 
 
 function click(ev){
-	let [x,y] = convertCoordEventToWebGL(ev);
+	let [x,y] = convertCoordinatesEventToWebGL(ev);
 	let point;
 	if(g_selectedType == POINT){
 		point = new Point();
@@ -645,14 +512,14 @@ function click(ev){
 }
 
 
-function convertCoordEventToWebGL(ev){
-	var x = ev.clientX;
-	var y = ev.clientY;
-	var rect = ev.target.getBoundingClientRect();
-	x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
-	y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
-	return ([x,y]);
-}
+// function convertCoordEventToWebGL(ev){
+// 	var x = ev.clientX;
+// 	var y = ev.clientY;
+// 	var rect = ev.target.getBoundingClientRect();
+// 	x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+// 	y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+// 	return ([x,y]);
+// }
 
 function convertCoordinatesEventToGL(ev){
    var x = ev.clientX; // x coordinate of a mouse pointer
@@ -664,7 +531,7 @@ function convertCoordinatesEventToGL(ev){
    y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
 
    // Print coordinate in console
-   // console.log("("+x+","+y+")");
+   console.log("("+x+","+y+")");
 
    return [x,y];
 }
@@ -673,18 +540,20 @@ function convertCoordinatesEventToGL(ev){
 function mouseCam(ev){
    coord = convertCoordinatesEventToGL(ev);
    if(coord[0] < 0.5){ // left side
-      g_camera.panMLeft(coord[0]*-10);
+      g_camera.panMLeft(coord[0]*-2.5);
    } else{
-      g_camera.panMRight(coord[0]*-10);
+      g_camera.panMRight(coord[0]*-2.5);
    }
 }
 
 function keydown(ev){
-   if(ev.keyCode==39 || ev.keyCode == 68){ // Right Arrow or D
-      g_camera.right();
-   } else if (ev.keyCode==37 || ev.keyCode == 65){ // Left Arrow or A
-      g_camera.left();
-   } else if (ev.keyCode==38 || ev.keyCode == 87){ // up Arrow or W
+//    if(ev.keyCode==39 || ev.keyCode == 68){ // Right Arrow or D
+//       g_camera.right();
+//    } else if (ev.keyCode==37 || ev.keyCode == 65){ // Left Arrow or A
+//       g_camera.left();
+//    } else 
+   
+   if (ev.keyCode==38 || ev.keyCode == 87){ // up Arrow or W
       g_camera.forward();
    } else if (ev.keyCode==40 || ev.keyCode == 83){ // down Arrow or S
       g_camera.back();
