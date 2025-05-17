@@ -1,12 +1,58 @@
 class Cube{
 	constructor(){
 		this.type = 'cube';
-		//this.position = [0,0,0];
 		this.color = [1,1,1,1];
-		//this.size = 5;
-		//this.sides = 3;
 		this.matrix = new Matrix4();
 		this.textureNum = -2;
+		this.cubeVerts32 = new Float32Array([
+			0,0,0, 1,1,0, 1,0,0,
+			0,0,0, 0,1,0, 1,1,0,
+			0,1,0, 0,1,1, 1,1,1,
+			0,1,0, 1,1,1, 1,1,0,
+			1,1,0, 1,1,1, 1,0,0,
+			1,0,0, 1,1,1, 1,0,1,
+			0,1,0, 0,1,1, 0,0,0,
+			0,0,0, 0,1,1, 0,0,1,
+			0,0,0, 0,0,1, 1,0,1,
+			0,0,0, 1,0,1, 1,0,0,
+			0,0,1, 1,1,1, 1,0,1,
+			0,0,1, 0,1,1, 1,1,1
+		]);
+		this.cubeVerts= [
+			0,0,0, 1,1,0, 1,0,0,
+			0,0,0, 0,1,0, 1,1,0,
+			0,1,0, 0,1,1, 1,1,1,
+			0,1,0, 1,1,1, 1,1,0,
+			1,1,0, 1,1,1, 1,0,0,
+			1,0,0, 1,1,1, 1,0,1,
+			0,1,0, 0,1,1, 0,0,0,
+			0,0,0, 0,1,1, 0,0,1,
+			0,0,0, 0,0,1, 1,0,1,
+			0,0,0, 1,0,1, 1,0,0,
+			0,0,1, 1,1,1, 1,0,1,
+			0,0,1, 0,1,1, 1,1,1
+		];
+
+		this.cubeUV = new Float32Array([
+			// Front
+			0,0, 1,1, 1,0,
+			0,0, 0,1, 1,1,
+			// Top
+			0,1, 0,0, 1,0,
+			0,1, 1,0, 1,1,
+			// Right
+			0,1, 1,1, 0,0,
+			0,0, 1,1, 1,0,
+			// Left
+			1,1, 0,0, 1,0,
+			1,1, 0,1, 0,0,
+			// Bottom
+			0,0, 1,1, 1,0,
+			0,0, 0,1, 1,1,
+			// Back
+			1,0, 0,1, 0,0,
+			1,0, 1,1, 0,1
+		]);
 	}
 
 	render(){
@@ -82,6 +128,51 @@ class Cube{
 
          drawTriangle3D(allverts);
 	}
+
+	// renderfaster(){
+	// 	var rgba = this.color;
+	// 	gl.uniform1i(u_whichTexture, this.textureNum);
+	// 	gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+	// 	gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
+	// 	if(g_vertexBuffer==null){
+	// 		initTriangle3D();
+	// 	}
+
+	// 	// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.cubeVerts), gl.DYNAMIC_DRAW);
+	// 	gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts32, gl.DYNAMIC_DRAW);
+
+	// 	gl.drawArrays(gl.TRIANGLES, 0, 36);
+
+	// }
+
+	renderfaster() {
+  gl.uniform1i(u_whichTexture, this.textureNum); // -2 = color only, >= 0 = texture unit
+  gl.uniform4f(u_FragColor, ...this.color);
+  gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
+  // Vertex buffer
+  if (g_vertexBuffer == null) {
+    g_vertexBuffer = gl.createBuffer();
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, g_vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, this.cubeVerts32, gl.DYNAMIC_DRAW);
+  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(a_Position);
+
+  // UV buffer
+  if (!g_uvBuffer) {
+    g_uvBuffer = gl.createBuffer();
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, g_uvBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, this.cubeUV, gl.DYNAMIC_DRAW);
+  gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(a_UV);
+
+  // Draw
+  gl.drawArrays(gl.TRIANGLES, 0, 36);
+}
+
 }
 
 /**

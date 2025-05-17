@@ -66,12 +66,12 @@ class Camera{
 
    right(){
     var f = new Vector3([0,0,0]);
-    f.set(this.at);
-    f.sub(this.eye); // f = at - eye
+    f.set(this.eye);
+    f.sub(this.at); // f = at - eye
     var s = Vector3.cross(f, this.up); // s = right direction
     s = s.normalize();
-    this.at = this.at.add(s.mul(-0.25)); // move in -right direction
-    this.eye = this.eye.add(s.mul(-0.25));
+    this.at = this.at.add(s.mul(0.25)); // move in -right direction
+    this.eye = this.eye.add(s.mul(0.25));
     this.viewMat.setLookAt(
         this.eye.elements[0], this.eye.elements[1],  this.eye.elements[2],
         this.at.elements[0],  this.at.elements[1],   this.at.elements[2],

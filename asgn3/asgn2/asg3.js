@@ -174,12 +174,42 @@ function addActionForHtmlUI(){
 
 }
 
+
+const textureManager = {};
+
+function loadTextureToManager(name, unit, src) {
+  const texture = gl.createTexture();
+  const image = new Image();
+
+  image.onload = function () {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+
+    textureManager[name] = { unit, texture };
+    console.log(`Texture ${name} loaded to unit ${unit}`);
+  };
+
+  image.src = src;
+}
+
+
+
 function initTextures() {
-//   var texture = gl.createTexture();   // Create a texture object
-//   if (!texture) {
-//     console.log('Failed to create the texture object');
-//     return false;
-//   }
+  var texture = gl.createTexture();   // Create a texture object
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
 
 
   var image = new Image();  // Create the image object
@@ -197,15 +227,19 @@ function initTextures() {
   // Register the event handler to be called on loading an image
   image.onload = function(){ sendImageToTEXTURE0(image); };
   // Tell the browser to load an image
-  image.src = 'worn_tile_floor_disp_4k.png';
+  image.src = 'patterned_brick_wall_03_disp_4k.png';
 
   // Register the event handler to be called on loading an image
   image1.onload = function(){ sendImageToTEXTURE1(image1); };
   // Tell the browser to load an image
-  image1.src = 'worn_tile_floor_diff_4k.jpg';
+  image1.src = 'patterned_brick_wall_03_diff_4k.jpg';
 
   // add more textures later
   return true;
+
+// loadTextureToManager('floor', 0, 'worn_tile_floor_diff_4k.jpg');
+// loadTextureToManager('sky', 1, 'worn_tile_floor_diff_4k.jpg');
+
 }
 
 function sendImageToTEXTURE0(image) {
@@ -495,11 +529,11 @@ function renderScene(){
 	gl.clear(gl.COLOR_BUFFER_BIT);	
 
 
-	var len = g_shapesList.length;
+	//var len = g_shapesList.length;
 
-	for (var a = 0; a < len; a += 1){
-		g_shapesList[a].renderfast();
-	}
+	// for (var a = 0; a < len; a += 1){
+	// 	g_shapesList[a].renderfaster();
+	// }
 	
 
 	renderCubes();

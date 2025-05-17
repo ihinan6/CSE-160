@@ -11,12 +11,12 @@ var g_map=[
 [0,0,0,0,1,0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1,0,0,0,0],
 [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
 [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
-[0,0,0,0,1,0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0],
-[0,0,0,0,1,0,0,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0],
-[0,0,0,0,1,0,0,0,0,0,0,0,0,1,2,2,2,1,1,0,0,1,1,1,1,0,0,1,0,0,0,0],
-[0,0,0,0,1,0,0,0,0,0,0,1,1,1,2,2,2,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
-[0,0,0,0,1,0,0,1,1,0,0,1,1,1,2,2,2,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
-[0,0,0,0,1,0,0,1,1,0,0,1,1,1,1,0,1,1,1,0,0,1,1,1,1,0,0,1,0,0,0,0],
+[0,0,0,0,1,0,0,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0],
+[0,0,0,0,1,0,0,1,1,0,0,1,1,2,2,2,2,2,1,0,0,0,0,0,1,0,0,1,0,0,0,0],
+[0,0,0,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,1,0,0,1,1,1,1,0,0,1,0,0,0,0],
+[0,0,0,0,1,0,0,0,0,0,0,1,1,2,2,2,2,2,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
+[0,0,0,0,1,0,0,1,1,0,0,1,1,2,2,2,2,2,1,0,0,1,0,0,0,0,0,1,0,0,0,0],
+[0,0,0,0,1,0,0,1,1,0,0,1,1,2,2,2,2,2,1,0,0,1,1,1,1,0,0,1,0,0,0,0],
 [0,0,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0],
 [0,0,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0],
 [0,0,0,0,1,0,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,1,1,0,0,1,1,1,0,0,0,0],
@@ -36,14 +36,19 @@ var g_map=[
 
 
 function map(){
+    var walls = new Cube();
+    walls.color = [0.5,0,0.5,1];
+    walls.textureNum= 1;
     for (x=0;x<32;x++){
         for(y=0;y<32;y++){
             if (g_map[x][y]==1){
-                var walls = new Cube();
-                walls.color = [0.5,0,0.5,1];
-                walls.textureNum= 0;
+                
+                //var walls = new Cube();
+                // walls.color = [0.5,0,0.5,1];
+                // walls.textureNum= -2
+                walls.matrix.setIdentity();
                 walls.matrix.translate(x-16,-.4,y-16);
-                walls.renderfast()
+                walls.renderfaster();
             }
         }
     }
@@ -65,16 +70,16 @@ function renderCubes(){
 	sky.textureNum = -2;
 	sky.matrix.scale(40,40,40);
 	sky.matrix.translate(-.5, -.5, -.5);
-	sky.renderfast();
+	sky.renderfaster();
 
 	// Floor ====================================
 	var floor = new Cube();
 	floor.color = [.2, .9, .4, 1];
-	floor.textureNum = 1;
+	floor.textureNum = 0;
 	floor.matrix.translate(0,-.4,0);
 	floor.matrix.scale(32,0,32);
 	floor.matrix.translate(-.5, 0, -.5);
-	floor.render();
+	floor.renderfaster();
 
 
 	
@@ -85,7 +90,7 @@ function renderCubes(){
 	body.matrix.setTranslate(-0.2,-0.2,-0.2);
 	//body.matrix.rotate(-5,1,0,0);
 	body.matrix.scale(0.45,.35,.55);
-	body.renderfast();
+	body.renderfaster();
 
 	// head
 	var head = new Cube();
@@ -93,7 +98,7 @@ function renderCubes(){
 	head.matrix.setTranslate(-0.075,0.05,-0.31);
 	//head.matrix.rotate(-5,1,0,0);
 	head.matrix.scale(0.2,0.3,.15);
-	head.renderfast();
+	head.renderfaster();
 
 	// beak1
 	var beak1 = new Cube();
@@ -101,7 +106,7 @@ function renderCubes(){
 	beak1.matrix.setTranslate(-0.075,0.2,-0.469);
 	//beak1.matrix.rotate(-5,1,0,0);
 	beak1.matrix.scale(0.2,0.05,.15);
-	beak1.renderfast();
+	beak1.renderfaster();
 
 	// beak2
 	var beak2 = new Cube();
@@ -110,7 +115,7 @@ function renderCubes(){
 	beak2.matrix.rotate(180,1,0,0);
 	beak2.matrix.rotate(-g_beakAngle,1,0,0);
 	beak2.matrix.scale(0.2,0.05,0.15);
-	beak2.renderfast();
+	beak2.renderfaster();
 
 
 	// right eye
@@ -119,7 +124,7 @@ function renderCubes(){
 	reye.matrix.setTranslate(-0.075,0.26,-0.35);
 	//reye.matrix.rotate(-5,1,0,0);
 	reye.matrix.scale(0.05,0.05,0.02);
-	reye.renderfast();
+	reye.renderfaster();
 
 	// left eye
 	var leye = new Cube();
@@ -127,7 +132,7 @@ function renderCubes(){
 	leye.matrix.setTranslate(0.075,0.26,-0.35);
 	//leye.matrix.rotate(-5,1,0,0);
 	leye.matrix.scale(0.05,0.05,.02);
-	leye.renderfast();
+	leye.renderfaster();
 
 	// redthing
 	var redthing = new Cube();
@@ -135,7 +140,7 @@ function renderCubes(){
 	redthing.matrix.setTranslate(-0.025,0.06,-0.35);
 	//redthing.matrix.rotate(-5,1,0,0);
 	redthing.matrix.scale(0.1,0.1,.05);
-	redthing.renderfast();
+	redthing.renderfaster();
 
 	// right wing
 	var rwing = new Cube();
@@ -144,7 +149,7 @@ function renderCubes(){
 	rwing.matrix.rotate(90,1,0,0);
 	rwing.matrix.rotate(g_rwingAngle, 0,1,0);
 	rwing.matrix.scale(0.05,0.45,0.25);
-	rwing.renderfast();
+	rwing.renderfaster();
 
 	// left wing
 	var lwing = new Cube();
@@ -153,7 +158,7 @@ function renderCubes(){
 	lwing.matrix.rotate(90,1,0,0);
 	lwing.matrix.rotate(-g_rwingAngle, 0,1,0);
 	lwing.matrix.scale(0.05,0.45,0.25);
-	lwing.renderfast();
+	lwing.renderfaster();
 
 	// right leg
 	var rleg = new Cube();
@@ -163,7 +168,7 @@ function renderCubes(){
 	rleg.matrix.rotate(g_legsAngle,1,0,0);
 	var rjoint = new Matrix4(rleg.matrix);
 	rleg.matrix.scale(0.05,0.2,.05);
-	rleg.renderfast();
+	rleg.renderfaster();
 
 	var rleg2 = new Cube();
 	rleg2.color = [1,0.6,0,1];
@@ -172,7 +177,7 @@ function renderCubes(){
 	rleg2.matrix.rotate(220,1,0,0);
 	var rjoint2 = new Matrix4(rleg2.matrix);
 	rleg2.matrix.scale(0.05,0.15,.05);
-	rleg2.renderfast();
+	rleg2.renderfaster();
 
 	var rfoot = new Cube();
 	rfoot.color = [1,0.6,0,1];
@@ -180,7 +185,7 @@ function renderCubes(){
 	rfoot.matrix.translate(-0.028,0,-0.1);
 	rfoot.matrix.rotate(0,1,0,0);
 	rfoot.matrix.scale(0.1,0.05,0.1);
-	rfoot.renderfast();
+	rfoot.renderfaster();
 
 	// left leg
 	var lleg = new Cube();
@@ -190,7 +195,7 @@ function renderCubes(){
 	lleg.matrix.rotate(-g_legsAngle,1,0,0);
 	var ljoint = new Matrix4(lleg.matrix);
 	lleg.matrix.scale(0.05,0.2,.05);
-	lleg.renderfast();
+	lleg.renderfaster();
 
 	var lleg2 = new Cube();
 	lleg2.color = [1,0.6,0,1];
@@ -199,7 +204,7 @@ function renderCubes(){
 	lleg2.matrix.rotate(220,1,0,0);
 	var ljoint2 = new Matrix4(lleg2.matrix);
 	lleg2.matrix.scale(0.05,0.15,.05);
-	lleg2.renderfast();
+	lleg2.renderfaster();
 
 	var lfoot = new Cube();
 	lfoot.color = [1,0.6,0,1];
@@ -207,7 +212,7 @@ function renderCubes(){
 	lfoot.matrix.translate(-0.028,0,-0.1);
 	lfoot.matrix.rotate(0,1,0,0);
 	lfoot.matrix.scale(0.1,0.05,0.1);
-	lfoot.renderfast();
+	lfoot.renderfaster();
 
 
 
