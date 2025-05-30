@@ -4,11 +4,38 @@
     <meta charset="utf-8" />
     <title>Lighting</title>
   </head>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    #webgl {
+      width: 100vh;
+      height: 100vh;
+      display: block;
+      float: left;
+    }
+  </style>
 
   <body onload="main()">
     <canvas id="webgl" width="400" height="400">
     Please use a browser that supports "canvas"
     </canvas>
+
+    <div id="notes" style="margin-left: 600px; padding: 30px 30px 30px 30px;">
+  <h3>Rubric Notes</h3>
+  <ul>
+    <li>Key commands for rotation work. Use W (walk forward), S (walk back), Q (rotate left), E (rotate right).</li>
+    <li>Has cubes, blocky animal in the center</li>
+    <li>Sphere next to blocky animal</li>
+    <li>ambient+diffuse+specular implemented with sliders</li>
+    <li>visual marker of light added</li>
+
+    <li>point light moved in a circle and can be shifted using sliders</li>
+    <li>blocky animal is lighted</li>
+    <li>buttons to visualize normals with color added </li>
+  </ul>
+</div>
 
     <br>
 	
