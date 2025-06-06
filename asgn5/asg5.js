@@ -12,7 +12,7 @@ function main() {
 	const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
 
 
-	const fov = 100;
+	const fov = 75;
 	const aspect = window.innerWidth / window.innerHeight; // the canvas default
 	const near = 0.1;
 	const far = 100;
@@ -20,7 +20,7 @@ function main() {
 	camera.position.set( 18, 1.5, 17 );
 
 	const controls = new OrbitControls( camera, canvas );
-	controls.target.set( -10, 0, 10 );
+	controls.target.set( -12, 0,  12);
 	controls.update();
 
 	const scene = new THREE.Scene();
@@ -205,7 +205,7 @@ function main() {
             scene.add(model);
             // spotlight 
             const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
-            spotLight.position.set(8.5, 10, 15); // position above and in front of the model
+            spotLight.position.set(9, 10, 4.5); // position above and in front of the model
             spotLight.angle = Math.PI / -12;       // cone spread
             spotLight.penumbra = 0.2;            // edge softness
             spotLight.decay = 2;                 // light dimming over distance
@@ -250,7 +250,7 @@ function main() {
 
             // spotlight 
             const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
-            spotLight.position.set(8.5, 10, 15); // position above and in front of the model
+            spotLight.position.set(17, 10, 6); // position above and in front of the model
             spotLight.angle = Math.PI / 8;       // cone spread
             spotLight.penumbra = 0.2;            // edge softness
             spotLight.decay = 2;                 // light dimming over distance
@@ -292,6 +292,20 @@ function main() {
             });
             
             scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(4, 10, 0.25); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
         },
         function (xhr) {
             console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
@@ -302,7 +316,350 @@ function main() {
         );
     }
 
-	
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/IbexTrophee.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(0, 0, 0);   
+            
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(0, 0, 0); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+
+    // red room --------------------------------------------------------
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = 3*Math.PI/2;
+            model.position.set(-8, 1.25, -13);   
+            model.scale.set(1.25, 1.25, 1.25);
+            
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-8, 10, -13); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+    {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/couch.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.rotation.y = -Math.PI / 2;
+                model.position.set(-9.5, 0, -14);
+                model.scale.set(0.8, 0.8, 0.8);   
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x451207  // Dark red
+                        });
+                    }
+                });
+
+                scene.add(model);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+
+        
+    }
+
+    {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/couch.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.rotation.y = -Math.PI / 2;
+                model.position.set(-9.5, 0, -12);
+                model.scale.set(0.8, 0.8, 0.8);   
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x451207  // Dark red
+                        });
+                    }
+                });
+
+                scene.add(model);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+
+
+    }
+
+	{
+
+		// const sphereRadius = 3;
+		// const sphereWidthDivisions = 32;
+		// const sphereHeightDivisions = 16;
+		// const sphereGeo = new THREE.SphereGeometry( sphereRadius, sphereWidthDivisions, sphereHeightDivisions );
+		// const sphereMat = new THREE.MeshPhongMaterial( { color: '#CA8' } );
+		// const mesh = new THREE.Mesh( sphereGeo, sphereMat );
+		// mesh.position.set( - sphereRadius - 1, sphereRadius + 2, 0 );
+		// scene.add( mesh );
+
+	}
+
+    {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/couch.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.position.set(-13, 0, -17);
+                model.scale.set(0.8, 0.8, 0.8);   
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x451207  // Dark red
+                        });
+                    }
+                });
+
+                scene.add(model);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/table.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.position.set(-14.5, 0, -16.75);
+                model.scale.set(2, 2, 2);   
+
+                scene.add(model);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/lamp.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.position.set(-8, 1.25, -16);
+                model.scale.set(3, 3, 3);  
+
+                scene.add(model);
+
+                // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-8, 10, -13); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+    }
+
+     {
+        const loader = new GLTFLoader();
+
+        loader.load(
+            'models/lamp.glb',        
+            function (gltf) {
+                const model = gltf.scene;
+                model.position.set(-8, 1.25, -10);
+                model.scale.set(3, 3, 3);  
+
+                scene.add(model);
+
+                // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-8, 10, -9); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+            },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLB model:', error);
+                }
+        );
+    }
+
+    {
+
+        const radius = 0.15;
+        const height = 0.4;
+        const radialSegments = 16;
+
+        const geometry = new THREE.ConeGeometry(radius, height, radialSegments);
+        const material = new THREE.MeshStandardMaterial({ color: 0xc9cdb2 }); 
+        const cone = new THREE.Mesh(geometry, material);
+        
+
+        cone.position.set(-14.25, 1.15, -16.75); // Raise cone so it sits on the ground
+
+        scene.add(cone);
+
+    }
+
+
+    let icosahedron;
+
+    {
+        const radius = 0.15;
+
+        const geometry = new THREE.IcosahedronGeometry(radius);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xc9cdb2, 
+            emissive: 0xc9cdb2, 
+            emissiveIntensity: 1 
+        });
+
+        icosahedron = new THREE.Mesh(geometry, material);
+        icosahedron.position.set(-14.25, 1.5, -16.75);
+
+        scene.add(icosahedron);
+
+        const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-8, 10, -16.75); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = icosahedron;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+
+        
+    }
+
+
+    
 
 	{
 
@@ -348,7 +705,7 @@ function main() {
 		scene.add( light );
         scene.add(light.target);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambient);
 
 		const gui = new GUI();
@@ -406,48 +763,70 @@ function main() {
     });
 
     function animate() {
-    requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
 
-    const speed = 0.1;
-    const rotationSpeed = 0.03;
+        const speed = 0.1;
+        const rotationSpeed = 0.03;
 
-    // forward (w)
-    if (keysPressed['w']) {
-        camera.position.x -= Math.sin(camera.rotation.y) * speed;
-        camera.position.z -= Math.cos(camera.rotation.y) * speed;
+        // forward (w)
+        if (keysPressed['w']) {
+            camera.position.x -= Math.sin(camera.rotation.y) * speed;
+            camera.position.z -= Math.cos(camera.rotation.y) * speed;
+
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        // backward (s)
+        if (keysPressed['s']) {
+            camera.position.x += Math.sin(camera.rotation.y) * speed;
+            camera.position.z += Math.cos(camera.rotation.y) * speed;
+
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        // left (a)
+        if (keysPressed['a']) {
+            camera.position.x -= Math.cos(camera.rotation.y) * speed;
+            camera.position.z += Math.sin(camera.rotation.y) * speed;
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        // right (d)
+        if (keysPressed['d']) {
+            camera.position.x += Math.cos(camera.rotation.y) * speed;
+            camera.position.z -= Math.sin(camera.rotation.y) * speed;
+
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        // rotate left (q)w
+        if (keysPressed['q']) {
+            camera.rotation.y += rotationSpeed;
+
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        // rotate right (e)
+        if (keysPressed['e']) {
+            camera.rotation.y -= rotationSpeed;
+
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        }
+
+        if (icosahedron) {
+            icosahedron.rotation.x += 0.01;
+            icosahedron.rotation.y += 0.01;
+        }   
+        
+        renderer.render(scene, camera);
     }
-
-    // backward (s)
-    if (keysPressed['s']) {
-        camera.position.x += Math.sin(camera.rotation.y) * speed;
-        camera.position.z += Math.cos(camera.rotation.y) * speed;
-    }
-
-    // left (a)
-    if (keysPressed['a']) {
-        camera.position.x -= Math.cos(camera.rotation.y) * speed;
-        camera.position.z += Math.sin(camera.rotation.y) * speed;
-    }
-
-    // right (d)
-    if (keysPressed['d']) {
-        camera.position.x += Math.cos(camera.rotation.y) * speed;
-        camera.position.z -= Math.sin(camera.rotation.y) * speed;
-    }
-
-    // rotate left (q)w
-    if (keysPressed['q']) {
-        camera.rotation.y += rotationSpeed;
-    }
-
-    // rotate right (e)
-    if (keysPressed['e']) {
-        camera.rotation.y -= rotationSpeed;
-    }
-
-    renderer.render(scene, camera);
-}
-animate();
+    animate();
 
 
 }
