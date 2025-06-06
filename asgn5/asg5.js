@@ -1,0 +1,455 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+// import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+
+function main() {
+
+	const canvas = document.querySelector( '#c' );
+	const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
+
+
+	const fov = 100;
+	const aspect = window.innerWidth / window.innerHeight; // the canvas default
+	const near = 0.1;
+	const far = 100;
+	const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+	camera.position.set( 18, 1.5, 17 );
+
+	const controls = new OrbitControls( camera, canvas );
+	controls.target.set( -10, 0, 10 );
+	controls.update();
+
+	const scene = new THREE.Scene();
+	scene.background = new THREE.Color( 'black' );
+
+	{
+
+		const planeSize = 45;
+
+		const loader = new THREE.TextureLoader();
+		const texture = loader.load('textures/chevron.png');
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping;
+		texture.magFilter = THREE.NearestFilter;
+		texture.colorSpace = THREE.SRGBColorSpace;
+		const repeats = planeSize / 2;
+		texture.repeat.set( repeats, repeats );
+
+		const planeGeo = new THREE.PlaneGeometry( planeSize, planeSize );
+		const planeMat = new THREE.MeshPhongMaterial( {
+			map: texture,
+			side: THREE.DoubleSide,
+		} );
+		const mesh = new THREE.Mesh( planeGeo, planeMat );
+		mesh.rotation.x = Math.PI * - .5;
+		scene.add( mesh );
+
+	}
+
+    {
+        const loader = new THREE.CubeTextureLoader();
+        const texture = loader.load([
+            'textures/red4.png',
+            'textures/red4.png',
+            'textures/red5.png',
+            'textures/red5.png',
+            'textures/red4.png',
+            'textures/red4.png'
+       
+        ]);
+        scene.background = texture;
+    }
+
+	{
+
+		// const cubeSize = 1;
+		// const cubeGeo = new THREE.BoxGeometry( cubeSize, cubeSize, cubeSize );
+		// const cubeMat = new THREE.MeshPhongMaterial( { color: '#880808' } );
+		// const mesh = new THREE.Mesh( cubeGeo, cubeMat );
+
+        // mesh.position.set(-11.5, 0.5, -11.5);
+        // scene.add( mesh );
+
+        var g_map=[
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            
+
+        ];
+
+        const geometry = new THREE.BoxGeometry(1, 6, 1);
+        const material = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+
+        for (let x = 0; x < 40; x++) {
+            for (let y = 0; y < 40; y++) {
+                if (g_map[x][y] === 0) {
+                    const cube = new THREE.Mesh(geometry, material); 
+                    cube.position.set(x - 20, 2.5, y - 20);
+                    scene.add(cube);
+                }
+            }
+        }
+
+
+		
+
+	}
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+
+        loader.load(
+        'models/Horse Statue.glb',              // path to your .glb file
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(8.5, 0, 21);     // optional positioning
+            model.scale.set(0.75, 0.75, 0.75);
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 200); // color, intensity
+            spotLight.position.set(8.5, 10, 15); // position above and in front of the model
+            spotLight.angle = Math.PI / 12;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 15;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); // optional progress
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Stag Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(9, 0, 10.5);   
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            
+            scene.add(model);
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(8.5, 10, 15); // position above and in front of the model
+            spotLight.angle = Math.PI / -12;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 15;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Fox Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(17, 0, 12);   
+            
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(8.5, 10, 15); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Doggi statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI/2;
+            model.position.set(4, 0, 6.25); 
+            model.scale.set(3,3,3);  
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            
+            scene.add(model);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+	
+
+	{
+
+		// const sphereRadius = 3;
+		// const sphereWidthDivisions = 32;
+		// const sphereHeightDivisions = 16;
+		// const sphereGeo = new THREE.SphereGeometry( sphereRadius, sphereWidthDivisions, sphereHeightDivisions );
+		// const sphereMat = new THREE.MeshPhongMaterial( { color: '#CA8' } );
+		// const mesh = new THREE.Mesh( sphereGeo, sphereMat );
+		// mesh.position.set( - sphereRadius - 1, sphereRadius + 2, 0 );
+		// scene.add( mesh );
+
+	}
+
+	class ColorGUIHelper {
+
+		constructor( object, prop ) {
+
+			this.object = object;
+			this.prop = prop;
+
+		}
+		get value() {
+
+			return `#${this.object[ this.prop ].getHexString()}`;
+
+		}
+		set value( hexString ) {
+
+			this.object[ this.prop ].set( hexString );
+
+		}
+
+	}
+
+	{
+
+		const color = 0xFFFFFF;
+		const intensity = 3;
+		const light = new THREE.DirectionalLight( color, intensity );
+        light.position.set(0,10,0);
+        light.target.position.set(-5, 0, 0);
+		scene.add( light );
+        scene.add(light.target);
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambient);
+
+		const gui = new GUI();
+		gui.addColor( new ColorGUIHelper( light, 'color' ), 'value' ).name( 'color' );
+		gui.add( light, 'intensity', 0, 5, 0.01 );
+        gui.add(light.target.position, 'x', -10, 10);
+        gui.add(light.target.position, 'z', -10, 10);
+        gui.add(light.target.position, 'y', 0, 10);
+
+	}
+
+	function resizeRendererToDisplaySize( renderer ) {
+
+		const canvas = renderer.domElement;
+		const width = canvas.clientWidth;
+		const height = canvas.clientHeight;
+		const needResize = canvas.width !== width || canvas.height !== height;
+		if ( needResize ) {
+
+			renderer.setSize( width, height, false );
+
+		}
+
+		return needResize;
+
+	}
+
+	function render() {
+
+		if ( resizeRendererToDisplaySize( renderer ) ) {
+
+			const canvas = renderer.domElement;
+			camera.aspect = canvas.clientWidth / canvas.clientHeight;
+			camera.updateProjectionMatrix();
+
+		}
+
+		renderer.render( scene, camera );
+
+		requestAnimationFrame( render );
+
+	}
+
+	requestAnimationFrame( render );
+
+
+    const keysPressed = {};
+
+    window.addEventListener('keydown', (event) => {
+        keysPressed[event.key.toLowerCase()] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+        keysPressed[event.key.toLowerCase()] = false;
+    });
+
+    function animate() {
+    requestAnimationFrame(animate);
+
+    const speed = 0.1;
+    const rotationSpeed = 0.03;
+
+    // forward (w)
+    if (keysPressed['w']) {
+        camera.position.x -= Math.sin(camera.rotation.y) * speed;
+        camera.position.z -= Math.cos(camera.rotation.y) * speed;
+    }
+
+    // backward (s)
+    if (keysPressed['s']) {
+        camera.position.x += Math.sin(camera.rotation.y) * speed;
+        camera.position.z += Math.cos(camera.rotation.y) * speed;
+    }
+
+    // left (a)
+    if (keysPressed['a']) {
+        camera.position.x -= Math.cos(camera.rotation.y) * speed;
+        camera.position.z += Math.sin(camera.rotation.y) * speed;
+    }
+
+    // right (d)
+    if (keysPressed['d']) {
+        camera.position.x += Math.cos(camera.rotation.y) * speed;
+        camera.position.z -= Math.sin(camera.rotation.y) * speed;
+    }
+
+    // rotate left (q)w
+    if (keysPressed['q']) {
+        camera.rotation.y += rotationSpeed;
+    }
+
+    // rotate right (e)
+    if (keysPressed['e']) {
+        camera.rotation.y -= rotationSpeed;
+    }
+
+    renderer.render(scene, camera);
+}
+animate();
+
+
+}
+
+main();
