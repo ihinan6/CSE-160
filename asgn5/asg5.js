@@ -10,9 +10,10 @@ function main() {
 
 	const canvas = document.querySelector( '#c' );
 	const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
+    
 
 
-	const fov = 75;
+	const fov = 100;
 	const aspect = window.innerWidth / window.innerHeight; // the canvas default
 	const near = 0.1;
 	const far = 100;
@@ -182,6 +183,52 @@ function main() {
         );
     }
 
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+
+        loader.load(
+        'models/Horse Statue.glb',              // path to your .glb file
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(-6, 0, 21);     // optional positioning
+            model.scale.set(0.75, 0.75, 0.75);
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 200); // color, intensity
+            spotLight.position.set(-6, 10, 21); // position above and in front of the model
+            spotLight.angle = Math.PI / 12;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 15;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); // optional progress
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
     {
         const loader = new GLTFLoader();
         const textureLoader = new THREE.TextureLoader();
@@ -232,6 +279,99 @@ function main() {
 
         const stoneTexture = textureLoader.load('textures/stone.jpg');
         loader.load(
+        'models/Stag Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(0, 0, 12);   
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            
+            scene.add(model);
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(0, 10, 12); // position above and in front of the model
+            spotLight.angle = Math.PI / -12;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 15;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Stag Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(-18, 0, 0.5);   
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            
+            scene.add(model);
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-18, 10, 0.5); // position above and in front of the model
+            spotLight.angle = Math.PI / -12;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 15;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+
+
+    
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
         'models/Fox Statue.glb',        
         function (gltf) {
             const model = gltf.scene;
@@ -251,6 +391,96 @@ function main() {
             // spotlight 
             const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
             spotLight.position.set(17, 10, 6); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Fox Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(-18, 0, 16);   
+            
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-18, 10, 16); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Fox Statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI;
+            model.position.set(-18, 0, -4);   
+            
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-18, 10, -4); // position above and in front of the model
             spotLight.angle = Math.PI / 8;       // cone spread
             spotLight.penumbra = 0.2;            // edge softness
             spotLight.decay = 2;                 // light dimming over distance
@@ -316,6 +546,51 @@ function main() {
         );
     }
 
+    {
+        const loader = new GLTFLoader();
+        const textureLoader = new THREE.TextureLoader();
+
+        const stoneTexture = textureLoader.load('textures/stone.jpg');
+        loader.load(
+        'models/Doggi statue.glb',        
+        function (gltf) {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI/2;
+            model.position.set(-10, 0, 0); 
+            model.scale.set(3,3,3);  
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                    map: stoneTexture
+                    });
+                }
+            });
+            
+            scene.add(model);
+
+            // spotlight 
+            const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
+            spotLight.position.set(-10, 10, 0); // position above and in front of the model
+            spotLight.angle = Math.PI / 8;       // cone spread
+            spotLight.penumbra = 0.2;            // edge softness
+            spotLight.decay = 2;                 // light dimming over distance
+            spotLight.distance = 30;             // how far it reaches
+            spotLight.castShadow = true;
+
+            // Make the light aim at the model
+            spotLight.target = model;
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded'); 
+        },
+        function (error) {
+            console.error('An error occurred while loading the GLB model:', error);
+        }
+        );
+    }
+
 
     {
         const loader = new GLTFLoader();
@@ -323,11 +598,11 @@ function main() {
 
         const stoneTexture = textureLoader.load('textures/stone.jpg');
         loader.load(
-        'models/IbexTrophee.glb',        
+        'models/ram.glb',        
         function (gltf) {
             const model = gltf.scene;
-            model.rotation.y = Math.PI;
-            model.position.set(0, 0, 0);   
+            model.rotation.y = Math.PI/2;
+            model.position.set(5, 1.5, -9);   
             
             model.traverse((child) => {
                 if (child.isMesh) {
@@ -341,7 +616,7 @@ function main() {
 
             // spotlight 
             const spotLight = new THREE.SpotLight(0xffffff, 150); // color, intensity
-            spotLight.position.set(0, 0, 0); // position above and in front of the model
+            spotLight.position.set(5, 10, -9); // position above and in front of the model
             spotLight.angle = Math.PI / 8;       // cone spread
             spotLight.penumbra = 0.2;            // edge softness
             spotLight.decay = 2;                 // light dimming over distance
@@ -827,6 +1102,38 @@ function main() {
         renderer.render(scene, camera);
     }
     animate();
+
+    {
+        const walkSound = new Audio('footsteps.mp3');
+        walkSound.volume = 0.5; // optional: adjust volume
+        walkSound.loop = false; // set true if you want it to keep playing
+
+        let walking = false;
+
+window.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if ((key === 'w' || key === 's' || key === 'a' || key === 'd')  && !walking) {
+        walking = true;
+        walkSound.currentTime = 0; // rewind to start
+        walkSound.play();
+    }
+    keysPressed[key] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+        const key = event.key.toLowerCase();
+        if (key === 'w') {
+            walking = false;
+            walkSound.pause();
+            walkSound.currentTime = 0; // reset to start
+        }
+        keysPressed[key] = false;
+    });
+
+
+
+
+    }
 
 
 }
