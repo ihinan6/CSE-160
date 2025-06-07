@@ -10,10 +10,9 @@ function main() {
 
 	const canvas = document.querySelector( '#c' );
 	const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
-    
 
 
-	const fov = 100;
+	const fov = 60;
 	const aspect = window.innerWidth / window.innerHeight; // the canvas default
 	const near = 0.1;
 	const far = 100;
@@ -983,12 +982,12 @@ function main() {
         const ambient = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambient);
 
-		const gui = new GUI();
-		gui.addColor( new ColorGUIHelper( light, 'color' ), 'value' ).name( 'color' );
-		gui.add( light, 'intensity', 0, 5, 0.01 );
-        gui.add(light.target.position, 'x', -10, 10);
-        gui.add(light.target.position, 'z', -10, 10);
-        gui.add(light.target.position, 'y', 0, 10);
+		// const gui = new GUI();
+		// gui.addColor( new ColorGUIHelper( light, 'color' ), 'value' ).name( 'color' );
+		// gui.add( light, 'intensity', 0, 5, 0.01 );
+        // gui.add(light.target.position, 'x', -10, 10);
+        // gui.add(light.target.position, 'z', -10, 10);
+        // gui.add(light.target.position, 'y', 0, 10);
 
 	}
 

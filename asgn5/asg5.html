@@ -3,6 +3,26 @@
 <head>
     <meta charset="UTF-8" />
     <title>Assignment 5</title>
+    <style>
+    body {
+      margin: 0;
+      display: flex;              /* Enables side-by-side layout */
+      height: 100vh;
+    }
+
+    #c {
+      flex: 1;                    /* Takes up remaining space */
+      display: block;
+    }
+
+    #notes {
+      width: 300px;               /* Fixed width sidebar */
+      padding: 10px;
+      background-color: #f4f4f4;  /* Light gray background */
+      font-family: sans-serif;
+      overflow-y: auto;          /* Scroll if content overflows */
+    }
+  </style>
     <script type="importmap">
     {
         "imports": {
@@ -17,6 +37,28 @@
 
 <body>
     <canvas id="c" width="600" height="600"></canvas>
+
+     <div id="notes" >
+
+  <h3>How To Play</h3>
+  <ul>
+    <li>Wait a few seconds until object load (until you see the horse statue on screen).</li>
+    <li>Key commands for rotation work. Use W (walk forward), S (walk back), Q (rotate left), E (rotate right).</li>
+    <li>Go through the Red Maze until you find the Red Room. The animals will guide you through the maze.</li>
+  </ul>
+  <h3>Rubric Notes</h3>
+  <ul>
+    <li>Shapes used, cubes, cone, icosahedron, various custom 3D models. Icosahedron is animated, found in the Red Room at the end of the maze, on the side table. Directional and ambient lighting is used on the whole map, spotlight used on the statues and lamps.</li>
+    <li>Floor, skybox, and animal statues are textured.</li>
+    <li>All statues and furniture except small lamp are custom 3D models.</li>
+    <li>Camera Controls: Key commands for rotation work. Use W (walk forward), S (walk back), Q (rotate left), E (rotate right). Orbit Controls implemented for debugging purposes.</li>
+    <li>Used directional, ambient, and spotlight lighting.</li>
+    <li>Skybox implemented.</li>
+    <li>20 Shapes: 11 statues, 6 furniture objects, 1 cone, 1 icosahedron (animated), cubes used for walls.</li>
+    <li>Extra Feature: implemented walking sound. Story (pls read): The Red Maze is based off of the show <em>Twin Peaks</em> created by Mark Frost and David Lynch. The final Red Room at the end of the maze is a recreation of the <a href="https://www.google.com/search?sca_esv=c99a67a28e4a9644&rlz=1C1VDKB_enUS967US967&q=twin+peaks+black+lodge&udm=2&fbs=AIIjpHxU7SXXniUZfeShr2fp4giZ1Y6MJ25_tmWITc7uy4KIeiAkWG4OlBE2zyCTMjPbGmMU8EWskMk2JSE__efdUJ3x5PHHJ1XtsYw_dXlK4AaMpWWZMXRPRC6JRtNg3R0JsjevZQRyEeGiJsRtVv_0LJbchgbMgrdS41m2RVbHcv1GQRjRh5cP7fwpQPwugk8KCC13aXcW93y_xfxNKItEJ2Wf2eaAVA&sa=X&sqi=2&ved=2ahUKEwj5wJrTh96NAxV0JUQIHQJRJWYQtKgLegQIExAB&biw=1536&bih=695&dpr=1.25#vhid=CPK5zHT8JN3gHM&vssid=mosaic">Black Lodge</a>
+ from <em>Twin Peaks</em>.</li>
+  </ul>
+</div>
 
     <script type="module" src="asg5.js"></script>
 
