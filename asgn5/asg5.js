@@ -1121,7 +1121,7 @@ window.addEventListener('keydown', (event) => {
 
     window.addEventListener('keyup', (event) => {
         const key = event.key.toLowerCase();
-        if (key === 'w') {
+        if ((key === 'w' || key === 's' || key === 'a' || key === 'd')) {
             walking = false;
             walkSound.pause();
             walkSound.currentTime = 0; // reset to start
